@@ -8,7 +8,7 @@ A 3D War Thunder-like combat game playable in your browser with a secret access 
 2. **Look for the secret trigger** in the **bottom right corner**
 3. **Double-click** the bottom right corner to reveal the CAPTCHA
 4. **Solve the CAPTCHA** to proceed
-5. **Enter the passcode**: `same1`
+5. **Enter the passcode**: `PHOENIX`
 6. **Start flying and take down the enemy bots!**
 
 ## 🎮 Game Controls
@@ -57,22 +57,6 @@ A 3D War Thunder-like combat game playable in your browser with a secret access 
 - **Particle-like Effects** - Visual feedback for gameplay
 - **Responsive Design** - Works on desktop and mobile
 - **Smooth Physics** - Realistic aircraft movement
-
-## 🚀 Deployment to GitHub Pages
-
-1. Push your code to GitHub
-2. Go to repository Settings → Pages
-3. Select "Deploy from a branch"
-4. Choose `main` branch and `/root` folder
-5. Your game will be live at `https://username.github.io/Sparxscience`
-
-## 🎨 Customization
-
-### Change the Passcode
-Edit `js/passcode.js` line 6:
-```javascript
-this.correctPasscode = 'YOUR_CODE_HERE';
-```
 
 ### Adjust Bot Difficulty
 Edit `js/bots.js` to modify:
