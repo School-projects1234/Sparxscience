@@ -2,7 +2,7 @@
 class PasscodeSystem {
     constructor() {
         // The secret passcode with obfuscation
-        this.correctPasscode = this.obfuscateCode('PHOENIX');
+        this.correctPasscode = this.obfuscateCode('same1');
         this.attemptCount = 0;
         this.maxAttempts = 5;
         this.lockoutTime = 0;
