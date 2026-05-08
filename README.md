@@ -1,6 +1,6 @@
 # War Thunder Browser Game 🎮
 
-A 3D War Thunder-like aerial combat game playable in your browser with a secret access system.
+A 3D War Thunder-like combat game playable in your browser with a secret access system.
 
 ## 🕵️ Secret Access Instructions
 
