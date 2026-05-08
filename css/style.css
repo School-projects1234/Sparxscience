@@ -671,6 +671,10 @@ input[type="password"]:focus {
     bottom: 2rem;
     left: 50%;
     transform: translateX(-50%);
+    max-width: 150px;
+    width: auto;
+    padding: 0.8rem 1.5rem !important;
+    font-size: 1rem !important;
 }
 
 /* AI Chat Styles */
