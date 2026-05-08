@@ -8,7 +8,7 @@ A 3D War Thunder-like aerial combat game playable in your browser with a secret 
 2. **Look for the secret trigger** in the **bottom right corner**
 3. **Double-click** the bottom right corner to reveal the CAPTCHA
 4. **Solve the CAPTCHA** to proceed
-5. **Enter the passcode**: `PHOENIX`
+5. **Enter the passcode**: `sparxscience`
 6. **Start flying and take down the enemy bots!**
 
 ## 🎮 Game Controls
