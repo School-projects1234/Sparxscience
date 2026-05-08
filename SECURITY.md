@@ -101,12 +101,6 @@ The CAPTCHA is designed to defeat optical character recognition:
    - Forces manual entry
    - Prevents password manager access
 
-### Default Passcode: PHOENIX
-**Note:** Change this in `js/passcode.js` line 6 before deployment:
-```javascript
-this.correctPasscode = this.obfuscateCode('YOUR_NEW_CODE');
-```
-
 ## 🚫 Content Filter Evasion
 
 ### Educational Content Disguise
