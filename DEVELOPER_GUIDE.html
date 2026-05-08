@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Documentation - Developer Guide</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #00ff00;
+            line-height: 1.6;
+            padding: 2rem;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+        h1, h2, h3 { color: #00ffff; margin: 1.5rem 0 0.5rem 0; }
+        h1 { border-bottom: 2px solid #00ff00; padding-bottom: 0.5rem; }
+        code { 
+            background: #0f0f23;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            color: #ffff00;
+        }
+        pre {
+            background: #0f0f23;
+            padding: 1rem;
+            border-left: 3px solid #00ff00;
+            overflow-x: auto;
+            margin: 1rem 0;
+        }
+        .section { margin: 2rem 0; padding: 1rem; border: 1px solid #00ff00; border-radius: 5px; }
+        .status { 
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 3px;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+        .status.complete { background: #00ff00; color: #000; }
+        .status.testing { background: #ffff00; color: #000; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 1rem 0; }
+        .stat-box { background: #0f0f23; padding: 1rem; border: 1px solid #00ffff; border-radius: 3px; }
+        .stat-label { color: #00ffff; font-size: 0.9rem; }
+        .stat-value { color: #00ff00; font-size: 1.5rem; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+        th, td { padding: 0.8rem; text-align: left; border-bottom: 1px solid #00ff00; }
+        th { background: #0f0f23; color: #00ffff; }
+        a { color: #00ffff; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .warning { background: #ff6600; color: black; padding: 1rem; border-radius: 5px; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>⚙️ War Thunder Browser Game - Developer Documentation</h1>
+        
+        <div class="section">
+            <h2>📊 Project Status</h2>
+            <span class="status complete">✓ COMPLETE</span>
+            <p>All core systems implemented and ready for deployment</p>
+        </div>
+
+        <div class="section">
+            <h2>📈 Project Statistics</h2>
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-label">Files</div>
+                    <div class="stat-value">11</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Lines of Code</div>
+                    <div class="stat-value">2500+</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">3D Models</div>
+                    <div class="stat-value">6+</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Bot Count</div>
+                    <div class="stat-value">5</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Core Systems</h2>
+            <table>
+                <tr>
+                    <th>System</th>
+                    <th>Status</th>
+                    <th>Location</th>
+                    <th>Details</th>
+                </tr>
+                <tr>
+                    <td>Landing Page</td>
+                    <td>✓</td>
+                    <td>index.html</td>
+                    <td>Sparx Science disguise with educational content</td>
+                </tr>
+                <tr>
+                    <td>Secret Trigger</td>
+                    <td>✓</td>
+                    <td>js/main.js</td>
+                    <td>Bottom right corner double-click + Ctrl+Shift+U</td>
+                </tr>
+                <tr>
+                    <td>CAPTCHA</td>
+                    <td>✓</td>
+                    <td>js/captcha.js</td>
+                    <td>Distorted alphanumeric code verification</td>
+                </tr>
+                <tr>
+                    <td>Passcode</td>
+                    <td>✓</td>
+                    <td>js/passcode.js</td>
+                    <td>Code: PHOENIX</td>
+                </tr>
+                <tr>
+                    <td>Game Engine</td>
+                    <td>✓</td>
+                    <td>js/game.js</td>
+                    <td>Three.js 3D engine with physics</td>
+                </tr>
+                <tr>
+                    <td>Bot AI</td>
+                    <td>✓</td>
+                    <td>js/bots.js</td>
+                    <td>5 aircraft with patrol, chase, and attack</td>
+                </tr>
+                <tr>
+                    <td>Controls</td>
+                    <td>✓</td>
+                    <td>js/game.js</td>
+                    <td>Keyboard + Mouse + Mobile touch</td>
+                </tr>
+                <tr>
+                    <td>Styling</td>
+                    <td>✓</td>
+                    <td>css/style.css</td>
+                    <td>Responsive design with retro HUD</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🎮 Game Mechanics</h2>
+            <h3>Patient Control & Movement</h3>
+            <pre>
+Movement Speed:    0.3 units per frame
+Rotation Speed:    0.005 radians per pixel (mouse)
+Acceleration:      0.95x per frame (drag)
+Gravity:           -0.008 units per frame
+Max Altitude:      100 units
+Min Altitude:      1 unit
+            </pre>
+
+            <h3>Combat System</h3>
+            <pre>
+Player Damage:     25 HP per shot
+Bot Damage:        5 HP per shot
+Bot Health:        100 HP
+Player Health:     100 HP
+Points per Kill:   100
+Ammo Pool:         120 rounds
+            </pre>
+
+            <h3>Bot AI Parameters</h3>
+            <pre>
+Detection Range:   30 units
+Chase Speed:       0.01 units per frame (50% of human)
+Shoot Cooldown:    30 frames (500ms at 60fps)
+Patrol Waypoints:  10 randomly generated
+Memory Timeout:    5000ms (forget player after 5s)
+            </pre>
+        </div>
+
+        <div class="section">
+            <h2>🔧 Configuration Guide</h2>
+            
+            <h3>Change Passcode</h3>
+            <pre>
+File: js/passcode.js
+Line: 6
+Change: this.correctPasscode = 'PHOENIX';
+        </pre>
+
+            <h3>Adjust Bot Difficulty</h3>
+            <pre>
+File: js/bots.js
+- Bot Count: Line 85 (this.botCount = 5;)
+- Bot Speed: Line 28 (this.speed = 0.01;)
+- Shoot Frequency: Line ~150 (this.shootCooldown = 30;)
+            </pre>
+
+            <h3>Game Physics</h3>
+            <pre>
+File: js/game.js
+- Move Speed: Line 293 (const moveSpeed = 0.3;)
+- Gravity: Line 460 (this.velocity.y -= 0.008;)
+- Max Speed: Line 450 (const maxSpeed = 0.5;)
+            </pre>
+
+            <h3>Visual Customization</h3>
+            <pre>
+File: css/style.css
+- HUD Color: Search ".hud-left" (change #00ff00)
+- Theme Colors: Line 1-50 (gradients and colors)
+- Health Bar Colors: Line 185-195
+            </pre>
+        </div>
+
+        <div class="section">
+            <h2>📱 Platform Support</h2>
+            <table>
+                <tr>
+                    <th>Platform</th>
+                    <th>Support</th>
+                    <th>Controls</th>
+                    <th>Performance</th>
+                </tr>
+                <tr>
+                    <td>Chrome/Edge</td>
+                    <td>✓ Full</td>
+                    <td>Keyboard + Mouse</td>
+                    <td>Excellent</td>
+                </tr>
+                <tr>
+                    <td>Firefox</td>
+                    <td>✓ Full</td>
+                    <td>Keyboard + Mouse</td>
+                    <td>Good</td>
+                </tr>
+                <tr>
+                    <td>Safari</td>
+                    <td>✓ Full</td>
+                    <td>Keyboard + Mouse</td>
+                    <td>Good</td>
+                </tr>
+                <tr>
+                    <td>iPhone/iPad</td>
+                    <td>⚠ Limited</td>
+                    <td>Touch Controls</td>
+                    <td>Fair</td>
+                </tr>
+                <tr>
+                    <td>Android</td>
+                    <td>✓ Full</td>
+                    <td>Touch Controls</td>
+                    <td>Good</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>🔐 Security Features</h2>
+            <ul>
+                <li>✓ Disguised as legitimate educational platform</li>
+                <li>✓ Non-obvious access trigger (bottom right corner)</li>
+                <li>✓ CAPTCHA prevents automated access</li>
+                <li>✓ Passcode adds additional barrier</li>
+                <li>✓ No external API calls (works offline)</li>
+                <li>✓ Client-side validation only (no server logs)</li>
+                <li>✓ Cannot be indexed by search engines (no sitemap)</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🚀 Deployment Checklist</h2>
+            <pre>
+□ All files created and validated
+□ No console errors in dev tools
+□ index.html loads correctly
+□ CSS and JS files linked properly
+□ Three.js library loaded from CDN
+□ Game runs locally on port 8000
+□ Hidden access works (double-click corner)
+□ CAPTCHA displays and generates codes
+□ Passcode verification works
+□ Game launches and runs smoothly
+□ Bots spawn and behave correctly
+□ Shooting and collision detection works
+□ Mobile controls tested
+□ All files pushed to GitHub
+□ GitHub Pages enabled in Settings
+□ Live URL accessed and verified
+            </pre>
+        </div>
+
+        <div class="section">
+            <h2>🐛 Known Limitations</h2>
+            <ul>
+                <li>Mobile performance varies by device capability</li>
+                <li>No persistence (progress not saved)</li>
+                <li>No multiplayer support</li>
+                <li>Limited to 5 concurrent bots (balances performance)</li>
+                <li>No sound effects (could be added)</li>
+                <li>No advanced graphics options</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📚 Code Architecture</h2>
+            <pre>
+index.html
+  ├─ Sparx Science UI
+  ├─ Modal System (CAPTCHA, Passcode)
+  ├─ Game Container (Three.js canvas)
+  └─ Script Imports
+
+js/main.js
+  └─ Secret Trigger Handler
+
+js/captcha.js
+  ├─ CAPTCHA Generation
+  ├─ Code Drawing
+  └─ Verification Logic
+
+js/passcode.js
+  └─ Passcode Verification
+
+js/game.js
+  ├─ GameEngine Class
+  ├─ PlayerAircraft Class
+  └─ Game Loop & Physics
+
+js/bots.js
+  ├─ Bot Class (individual AI)
+  └─ BotManager Class (multiple AI management)
+
+css/style.css
+  ├─ Sparx Page Styling
+  ├─ Modal Styling
+  └─ Game HUD Styling
+            </pre>
+        </div>
+
+        <div class="warning">
+            ⚠️ <strong>IMPORTANT:</strong> Keep the passcode secret if you want genuine restricted access. If you share this documentation, consider changing the code in js/passcode.js before deployment.
+        </div>
+
+        <div class="section">
+            <h2>🎯 Future Enhancements</h2>
+            <ul>
+                <li>Add sound effects and background music</li>
+                <li>Implement power-ups (ammo, health, shields)</li>
+                <li>Add more enemy types and strategies</li>
+                <li>Boss flight encounters</li>
+                <li>Campaign missions</li>
+                <li>Leaderboard system (with localStorage)</li>
+                <li>Visual effects (explosions, smoke trails)</li>
+                <li>Advanced graphics options</li>
+                <li>Controller/Gamepad support</li>
+                <li>Multiplayer via WebSocket</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>📞 Support & Contact</h2>
+            <p>For issues or questions:</p>
+            <ol>
+                <li>Check browser console (F12 → Console tab)</li>
+                <li>Verify all files are in correct folders</li>
+                <li>Test locally first with: <code>python3 -m http.server 8000</code></li>
+                <li>Clear browser cache: Ctrl+Shift+Delete</li>
+                <li>Try a different browser</li>
+            </ol>
+        </div>
+
+        <hr style="border: 1px solid #00ff00; margin: 2rem 0;">
+        <p style="text-align: center; color: #00ffff;">
+            War Thunder Browser Game v1.0 | Built with Three.js | Deployed on GitHub Pages
+        </p>
+    </div>
+</body>
+</html>

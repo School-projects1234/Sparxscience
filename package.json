@@ -1,0 +1,23 @@
+{
+  "name": "sparx-science-war-thunder-game",
+  "version": "1.0.0",
+  "description": "A 3D War Thunder-like aerial combat game disguised as a Sparx Science educational platform with secret access",
+  "main": "index.html",
+  "scripts": {
+    "start": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "game",
+    "3d",
+    "threejs",
+    "aerial-combat",
+    "browser-game",
+    "secret-access"
+  ],
+  "author": "School Projects",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/School-projects1234/Sparxscience.git"
+  }
+}

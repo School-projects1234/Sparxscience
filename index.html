@@ -1,1 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sparx Science - Learn Physics Today</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Sparx Science Disguise Page -->
+    <div id="sparxPage" class="sparx-container">
+        <nav class="sparx-nav">
+            <div class="nav-logo">
+                <span class="logo-icon">⚛️</span>
+                <span class="logo-text">Sparx Science</span>
+            </div>
+            <div class="nav-menu">
+                <a href="#" class="nav-link">Physics</a>
+                <a href="#" class="nav-link">Chemistry</a>
+                <a href="#" class="nav-link">Biology</a>
+                <a href="#" class="nav-link">Assignments</a>
+            </div>
+            <div class="nav-profile">👤 Login</div>
+        </nav>
+
+        <div class="sparx-header">
+            <h1>Welcome to Sparx Science</h1>
+            <p>Interactive Physics Learning Platform</p>
+        </div>
+
+        <section class="courses-grid">
+            <div class="course-card">
+                <h3>🚀 Mechanics</h3>
+                <p>Learn about motion, forces, and energy</p>
+            </div>
+            <div class="course-card">
+                <h3>⚡ Electricity</h3>
+                <p>Master circuits and electromagnetic theory</p>
+            </div>
+            <div class="course-card">
+                <h3>🌊 Waves</h3>
+                <p>Understand sound, light, and vibrations</p>
+            </div>
+            <div class="course-card">
+                <h3>🔬 Thermodynamics</h3>
+                <p>Explore heat and energy transfer</p>
+            </div>
+        </section>
+
+        <section class="featured">
+            <h2>Today's Featured Lesson</h2>
+            <div class="lesson-preview">
+                <h3>Projectile Motion Fundamentals</h3>
+                <p>Discover how objects move through the air and calculate their trajectories using physics principles.</p>
+                <button class="btn-primary">Start Lesson</button>
+            </div>
+        </section>
+
+        <footer class="sparx-footer">
+            <p>&copy; 2026 Sparx Science | Making Physics Fun and Accessible</p>
+            <p style="font-size: 10px; opacity: 0.5;">Version 2.1.4</p>
+        </footer>
+
+        <!-- Hidden Trigger (Bottom Right Corner) -->
+        <div id="secretTrigger" class="secret-trigger"></div>
+    </div>
+
+    <!-- CAPTCHA Modal -->
+    <div id="captchaModal" class="modal hidden">
+        <div class="modal-content captcha-container">
+            <div class="modal-header">
+                <h2>Verification Required</h2>
+                <button class="close-btn" id="closeCaptcha">&times;</button>
+            </div>
+            <div class="captcha-content">
+                <p>Please prove you're not a bot</p>
+                <canvas id="captchaCanvas" width="200" height="60"></canvas>
+                <input type="text" id="captchaInput" placeholder="Enter the code above" maxlength="6">
+                <button id="submitCaptcha" class="btn-primary">Verify</button>
+                <p id="captchaError" class="error-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Passcode Modal -->
+    <div id="passcodeModal" class="modal hidden">
+        <div class="modal-content passcode-container">
+            <div class="modal-header">
+                <h2>Access Code</h2>
+                <button class="close-btn" id="closePasscode">&times;</button>
+            </div>
+            <div class="passcode-content">
+                <p>Enter your access code:</p>
+                <input type="password" id="passcodeInput" placeholder="••••••" maxlength="8">
+                <button id="submitPasscode" class="btn-primary">Submit</button>
+                <p id="passcodeError" class="error-message"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Menu Container -->
+    <div id="mainMenu" class="main-menu hidden">
+        <div class="menu-header">
+            <h1>🎮 Portal</h1>
+            <p>Select Your Experience</p>
+        </div>
+
+        <div class="menu-content">
+            <!-- Games Section -->
+            <div class="menu-section">
+                <h2>Available Games</h2>
+                <div class="games-scroll">
+                    <div class="game-card" data-game="warthunder">
+                        <div class="game-icon">🛩️</div>
+                        <h3>Sky Dominance</h3>
+                        <p>3D aerial combat with AI bots</p>
+                        <span class="game-status">▶ Play</span>
+                    </div>
+                    <div class="game-card" data-game="survival">
+                        <div class="game-icon">🌍</div>
+                        <h3>Survival Challenge</h3>
+                        <p>Survival mode with extreme AI</p>
+                        <span class="game-status">▶ Play</span>
+                    </div>
+                    <div class="game-card" data-game="training">
+                        <div class="game-icon">🎯</div>
+                        <h3>Training Academy</h3>
+                        <p>Learn and master the controls</p>
+                        <span class="game-status">▶ Play</span>
+                    </div>
+                    <div class="game-card" data-game="endless">
+                        <div class="game-icon">♾️</div>
+                        <h3>Endless Mode</h3>
+                        <p>Face infinite waves of enemies</p>
+                        <span class="game-status">▶ Play</span>
+                    </div>
+                    <div class="game-card" data-game="challenge">
+                        <div class="game-icon">👑</div>
+                        <h3>Boss Challenge</h3>
+                        <p>Defeat powerful enemy bosses</p>
+                        <span class="game-status">▶ Play</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Section -->
+            <div class="menu-section ai-section">
+                <h2>🤖 AI Assistant</h2>
+                <button id="openAI" class="btn-ai">Open ChatBot</button>
+            </div>
+        </div>
+
+        <button id="logoutMenu" class="btn-secondary">Logout</button>
+    </div>
+
+    <!-- AI Chat Container -->
+    <div id="aiContainer" class="ai-container hidden">
+        <div class="ai-chat">
+            <div class="ai-header">
+                <h2>🤖 AI Assistant</h2>
+                <button class="close-ai" id="closeAI">✕</button>
+            </div>
+
+            <div class="chat-messages" id="chatMessages">
+                <div class="message ai-message">
+                    <p>Hello! I'm your AI assistant. Ask me anything about the games, get help, or just chat! What can I help you with?</p>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Type your message..." maxlength="500">
+                <button id="sendMessage" class="btn-send">Send</button>
+            </div>
+        </div>
+
+        <button class="back-to-menu" id="backToMenuAI">← Back to Menu</button>
+    </div>
+
+    <!-- Game Container -->
+    <div id="gameContainer" class="game-container hidden">
+        <div id="gameHUD">
+            <div class="hud-left">
+                <div class="hud-item">
+                    <span class="hud-label">Health</span>
+                    <div class="health-bar">
+                        <div id="healthFill" class="health-fill" style="width: 100%;"></div>
+                    </div>
+                    <span id="healthText">100%</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Ammo</span>
+                    <span id="ammoText">120</span>
+                </div>
+            </div>
+            
+            <div class="hud-center">
+                <div class="crosshair"></div>
+            </div>
+            
+            <div class="hud-right">
+                <div class="hud-item">
+                    <span class="hud-label">Score</span>
+                    <span id="scoreText">0</span>
+                </div>
+                <div class="hud-item">
+                    <span class="hud-label">Enemies</span>
+                    <span id="enemyCountText">5</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="controls-info" class="controls-info">
+            <p><strong>🎮 Controls:</strong> WASD/Arrows-Move | Mouse-Look | Click/Space-Shoot | Mobile-Touch Controls</p>
+        </div>
+
+        <button id="quitGame" class="btn-secondary">Quit to Menu</button>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/captcha.js"></script>
+    <script src="js/passcode.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/ai.js"></script>
+    <script src="js/bots.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
 
