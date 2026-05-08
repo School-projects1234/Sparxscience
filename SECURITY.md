@@ -18,7 +18,6 @@ The game cannot be blocked by monitoring a single access method:
 
 3. **Keyboard Shortcut #2: Alt+Shift+P** (backup)
    - Secondary keyboard shortcut
-   - "P" for Phoenix (the passcode hint)
 
 4. **Mobile Two-Finger Tap** (triple-tap trigger)
    - Mobile-specific access method
