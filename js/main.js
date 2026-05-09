@@ -59,6 +59,7 @@ class SparxScience {
         }
 
         this.accessRequests = JSON.parse(localStorage.getItem('sparxScienceAccessRequests') || '[]');
+        this.bannedAccounts = JSON.parse(localStorage.getItem('sparxScienceBannedAccounts') || '[]');
         this.currentAccount = localStorage.getItem('sparxScienceCurrentAccount') || '';
 
         this.signInButton.addEventListener('click', () => this.handleSignIn());
@@ -176,6 +177,12 @@ class SparxScience {
             return;
         }
 
+        const banInfo = this.getBanInfo(this.currentAccount);
+        if (banInfo) {
+            this.showBannedState(banInfo);
+            return;
+        }
+
         if (this.isAuthorizedAccount(this.currentAccount)) {
             this.grantAccess();
         } else {
@@ -187,6 +194,14 @@ class SparxScience {
         const account = this.accountInput.value.trim().toLowerCase();
         if (!account) {
             this.accessStatus.textContent = 'Enter a Google account email to continue.';
+            return;
+        }
+
+        const banInfo = this.getBanInfo(account);
+        if (banInfo) {
+            this.currentAccount = account;
+            localStorage.setItem('sparxScienceCurrentAccount', account);
+            this.showBannedState(banInfo);
             return;
         }
 
@@ -250,6 +265,12 @@ class SparxScience {
             return;
         }
 
+        const banInfo = this.getBanInfo(account);
+        if (banInfo) {
+            this.showBannedState(banInfo);
+            return;
+        }
+
         const pending = this.accessRequests.find(req => req.account === account && req.status === 'pending');
         if (pending) {
             this.accessStatus.textContent = 'A request is already pending for this account.';
@@ -268,7 +289,7 @@ class SparxScience {
         this.saveAccessRequests();
         this.accessStatus.textContent = 'Request submitted. Admin will review it shortly.';
         this.requestAccessButton.classList.add('hidden');
-        this.renderRequestList();
+        this.renderAdminPanel();
     }
 
     saveAccessRequests() {
@@ -279,25 +300,96 @@ class SparxScience {
         localStorage.setItem('sparxScienceAllowedAccounts', JSON.stringify(this.allowedAccounts));
     }
 
-    showAdminVerification() {
+    saveBannedAccounts() {
+        localStorage.setItem('sparxScienceBannedAccounts', JSON.stringify(this.bannedAccounts));
+    }
+
+    getBanInfo(account) {
+        const normalized = account.toLowerCase();
+        const now = Date.now();
+        const activeBans = this.bannedAccounts.filter(ban => !ban.expiresAt || ban.expiresAt > now);
+        if (activeBans.length !== this.bannedAccounts.length) {
+            this.bannedAccounts = activeBans;
+            this.saveBannedAccounts();
+        }
+        return this.bannedAccounts.find(ban => ban.account === normalized);
+    }
+
+    isBannedAccount(account) {
+        return !!this.getBanInfo(account);
+    }
+
+    showBannedState(banInfo) {
+        this.accessOverlay.classList.remove('hidden');
+        this.sparxPage.classList.add('blurred');
+        const expires = banInfo.expiresAt ? new Date(banInfo.expiresAt).toLocaleString() : 'forever';
+        this.accessStatus.textContent = `This account is banned until ${expires}. Reason: ${banInfo.reason || 'Violation of rules.'}`;
+        this.requestAccessButton.classList.add('hidden');
+        this.adminToolsButton.classList.add('hidden');
+        this.navProfile.textContent = '👤 Login';
+    }
+
+    banAccount(account, durationDays, reason) {
+        const normalized = account.toLowerCase();
+        const expiresAt = durationDays ? Date.now() + durationDays * 24 * 60 * 60 * 1000 : null;
+        const existing = this.bannedAccounts.find(ban => ban.account === normalized);
+
+        if (existing) {
+            existing.expiresAt = expiresAt;
+            existing.reason = reason;
+            existing.bannedAt = new Date().toISOString();
+        } else {
+            this.bannedAccounts.push({
+                account: normalized,
+                reason,
+                bannedAt: new Date().toISOString(),
+                expiresAt
+            });
+        }
+
+        this.saveBannedAccounts();
+        this.revokeAccess(normalized);
+        this.renderAdminPanel();
+    }
+
+    revokeAccess(account) {
+        const normalized = account.toLowerCase();
+        if (normalized === this.adminEmail) {
+            return;
+        }
+
+        this.allowedAccounts = this.allowedAccounts.filter(acc => acc.toLowerCase() !== normalized);
+        this.saveAllowedAccounts();
+
+        if (this.currentAccount.toLowerCase() === normalized) {
+            this.currentAccount = '';
+            localStorage.removeItem('sparxScienceCurrentAccount');
+            this.showRestrictedState();
+        }
+    }
+
+    openAdminPanel() {
         if (this.currentAccount.toLowerCase() !== this.adminEmail) {
             alert('Admin verification is restricted to the admin account.');
             return;
         }
 
-        document.getElementById('captchaModal').classList.remove('hidden');
-    }
-
-    openAdminPanel() {
         this.accessOverlay.classList.add('hidden');
         this.sparxPage.classList.remove('blurred');
         this.adminPanel.classList.remove('hidden');
-        this.renderRequestList();
+        this.renderAdminPanel();
     }
 
     hideAdminPanel() {
         this.adminPanel.classList.add('hidden');
         console.log('Admin panel hidden');
+    }
+
+    renderAdminPanel() {
+        if (!this.requestList) return;
+        this.renderRequestList();
+        this.renderAuthorizedList();
+        this.renderBannedList();
     }
 
     renderRequestList() {
@@ -313,13 +405,14 @@ class SparxScience {
                 `<div class="request-actions">
                     <button class="request-action-btn approve" data-action="approve" data-id="${request.id}">Approve</button>
                     <button class="request-action-btn deny" data-action="deny" data-id="${request.id}">Deny</button>
+                    <button class="request-action-btn ban" data-action="ban" data-id="${request.id}">Ban</button>
                  </div>` : '';
 
             return `<div class="request-item">
                 <p><strong>Account:</strong> ${request.account}</p>
                 <p><strong>Browser:</strong> ${request.browser}</p>
                 <p><strong>Status:</strong> ${request.status}</p>
-                <p><strong>Submitted:</strong> ${new Date(request.created).toLocaleString()}</p>
+                <p><strong>Submitted:</strong> ${this.formatTimestamp(request.created)}</p>
                 ${actions}
             </div>`;
         }).join('');
@@ -332,9 +425,105 @@ class SparxScience {
                     this.updateRequestStatus(id, 'approved');
                 } else if (action === 'deny') {
                     this.updateRequestStatus(id, 'denied');
+                } else if (action === 'ban') {
+                    this.banRequestAccount(id);
                 }
             });
         });
+    }
+
+    renderAuthorizedList() {
+        const authorizedList = document.getElementById('authorizedList');
+        if (!authorizedList) return;
+
+        if (this.allowedAccounts.length === 0) {
+            authorizedList.innerHTML = '<p>No authorized accounts yet.</p>';
+            return;
+        }
+
+        authorizedList.innerHTML = this.allowedAccounts.map(account => {
+            if (!account) return '';
+            const normalizedAccount = account.toLowerCase();
+            if (normalizedAccount === this.adminEmail) {
+                return `<div class="request-item admin-account">
+                    <p><strong>Account:</strong> ${account}</p>
+                    <p><em>Admin account</em></p>
+                </div>`;
+            }
+
+            return `<div class="request-item">
+                <p><strong>Account:</strong> ${account}</p>
+                <div class="request-actions">
+                    <button class="request-action-btn revoke" data-action="revoke" data-account="${account}">Revoke</button>
+                    <button class="request-action-btn ban" data-action="ban" data-account="${account}">Ban</button>
+                </div>
+            </div>`;
+        }).join('');
+
+        authorizedList.querySelectorAll('.request-action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = e.target.dataset.action;
+                const account = e.target.dataset.account;
+                if (action === 'revoke') {
+                    this.revokeAccess(account);
+                } else if (action === 'ban') {
+                    this.banAccount(account, 7, 'Admin-issued ban');
+                }
+            });
+        });
+    }
+
+    renderBannedList() {
+        const bannedList = document.getElementById('bannedList');
+        if (!bannedList) return;
+
+        if (this.bannedAccounts.length === 0) {
+            bannedList.innerHTML = '<p>No banned accounts.</p>';
+            return;
+        }
+
+        bannedList.innerHTML = this.bannedAccounts.map(ban => {
+            const expires = ban.expiresAt ? this.formatTimestamp(ban.expiresAt) : 'forever';
+            return `<div class="request-item banned">
+                <p><strong>Account:</strong> ${ban.account}</p>
+                <p><strong>Reason:</strong> ${ban.reason || 'N/A'}</p>
+                <p><strong>Banned until:</strong> ${expires}</p>
+                <div class="request-actions">
+                    <button class="request-action-btn revoke" data-action="unban" data-account="${ban.account}">Unban</button>
+                </div>
+            </div>`;
+        }).join('');
+
+        bannedList.querySelectorAll('.request-action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = e.target.dataset.action;
+                const account = e.target.dataset.account;
+                if (action === 'unban') {
+                    this.unbanAccount(account);
+                }
+            });
+        });
+    }
+
+    formatTimestamp(value) {
+        return new Date(value).toLocaleString();
+    }
+
+    banRequestAccount(requestId) {
+        const request = this.accessRequests.find(req => req.id === requestId);
+        if (!request) return;
+
+        this.banAccount(request.account, 7, 'Admin rejected access request and banned account');
+        request.status = 'denied';
+        request.reviewed = new Date().toISOString();
+        this.saveAccessRequests();
+        this.renderAdminPanel();
+    }
+
+    unbanAccount(account) {
+        this.bannedAccounts = this.bannedAccounts.filter(ban => ban.account !== account.toLowerCase());
+        this.saveBannedAccounts();
+        this.renderAdminPanel();
     }
 
     updateRequestStatus(requestId, status) {
@@ -352,7 +541,7 @@ class SparxScience {
         }
 
         this.saveAccessRequests();
-        this.renderRequestList();
+        this.renderAdminPanel();
 
         if (request.account === this.currentAccount && status === 'approved') {
             this.grantAccess();

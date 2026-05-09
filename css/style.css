@@ -177,6 +177,17 @@ body {
     margin-top: 0.75rem;
 }
 
+.admin-section {
+    padding: 1rem 0;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.admin-section h3 {
+    margin: 0 0 0.75rem 0;
+    color: #e2e8f0;
+    font-size: 1rem;
+}
+
 .request-action-btn {
     border: none;
     border-radius: 12px;
@@ -193,6 +204,16 @@ body {
 .request-action-btn.deny {
     background: #dc2626;
     color: white;
+}
+
+.request-action-btn.ban {
+    background: #f97316;
+    color: white;
+}
+
+.request-item.banned {
+    border-color: rgba(220, 38, 38, 0.3);
+    background: rgba(220, 38, 38, 0.08);
 }
 
 .admin-header {
