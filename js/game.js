@@ -10,11 +10,20 @@ class GameEngine {
         this.score = 0;
         this.health = 100;
         this.ammo = 120;
+        this.enemyCount = 0;
+        this.gameMode = 'warthunder';
+        this.selectedGame = 'warthunder';
+        this.gameTitle = 'War Thunder - Aerial Combat';
+        this.vehicleType = 'aircraft';
+        this.botCount = 5;
+        this.difficulty = 1.0;
+        this.waveMultiplier = 1.0;
         this.gameRunning = false;
         this.keys = {};
         this.touchInput = { x: 0, y: 0, active: false };
         this.angleX = 0;
         this.angleY = 0;
+        this.inputBound = false;
         this.antiDetectionActive = true;
         this.screenRecordingDetected = false;
     }
@@ -27,29 +36,29 @@ class GameEngine {
 
         // Camera with better perspective
         this.camera = new THREE.PerspectiveCamera(
-            75, 
-            window.innerWidth / window.innerHeight, 
-            0.1, 
+            75,
+            window.innerWidth / window.innerHeight,
+            0.1,
             10000
         );
         this.camera.position.set(0, 5, 0);
 
         // Renderer with enhanced settings
-        this.renderer = new THREE.WebGLRenderer({ 
+        this.renderer = new THREE.WebGLRenderer({
             antialias: true,
             powerPreference: 'high-performance'
         });
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
-        this.renderer.shadowMap.type = THREE.PCFShadowShadowMap;
+        this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
         this.renderer.outputEncoding = THREE.sRGBEncoding;
-        
+
         document.getElementById('gameContainer').insertBefore(
-            this.renderer.domElement, 
+            this.renderer.domElement,
             document.getElementById('gameHUD')
         );
 
-        // Enhanced lighting system
+        // Add atmospheric lights
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.7);
         this.scene.add(ambientLight);
 
@@ -66,19 +75,26 @@ class GameEngine {
         directionalLight.shadow.bias = -0.0001;
         this.scene.add(directionalLight);
 
-        // Add atmospheric effects
-        const skylight = new THREE.HemisphereLight(0xaabbff, 0x886633, 0.5);
+        const skylight = new THREE.HemisphereLight(0xaabbff, 0x886633, 0.55);
         this.scene.add(skylight);
 
-        // Create terrain
+        this.setupMode();
         this.createTerrain();
 
         // Create player
-        this.player = new PlayerAircraft(this.scene);
+        this.player = new PlayerAircraft(this.scene, this.vehicleType);
 
         // Initialize bot manager
         this.botManager = new BotManager(this.scene, this);
+        this.botManager.botCount = this.botCount;
         this.botManager.initialize();
+
+        this.updateScore();
+        this.updateHealth();
+        this.updateAmmo();
+        this.updateEnemyCount(this.botManager.bots.length);
+        document.getElementById('gameTitle').textContent = this.gameTitle;
+        document.getElementById('gameModeText').textContent = this.gameMode.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
         // Setup event listeners
         this.setupInput();
@@ -91,39 +107,166 @@ class GameEngine {
         document.getElementById('quitGame').addEventListener('click', () => this.quitGame());
     }
 
+    setupMode() {
+        const mode = this.gameMode;
+        this.gameTitle = this.gameTitle || 'Sparx Combat';
+        this.vehicleType = this.vehicleType || 'aircraft';
+
+        switch (mode) {
+            case 'warthunder':
+                this.scene.background.set(0x87ceeb);
+                this.scene.fog.color.set(0x87ceeb);
+                break;
+            case 'warthunder_tanks':
+                this.scene.background.set(0x778899);
+                this.scene.fog.color.set(0x778899);
+                break;
+            case 'survival':
+                this.scene.background.set(0x5f7a99);
+                this.scene.fog.color.set(0x5f7a99);
+                this.botCount = 8;
+                break;
+            case 'training':
+                this.scene.background.set(0xa4c0d9);
+                this.scene.fog.color.set(0xa4c0d9);
+                this.botCount = 2;
+                break;
+            case 'endless':
+                this.scene.background.set(0x1e2a3b);
+                this.scene.fog.color.set(0x1e2a3b);
+                this.botCount = 6;
+                break;
+            case 'challenge':
+                this.scene.background.set(0x4a4a4a);
+                this.scene.fog.color.set(0x4a4a4a);
+                this.botCount = 3;
+                break;
+            case 'minecraft':
+                this.scene.background.set(0x8ac926);
+                this.scene.fog.color.set(0x8ac926);
+                this.botCount = 0;
+                break;
+            case 'roblox':
+                this.scene.background.set(0x73a4ff);
+                this.scene.fog.color.set(0x73a4ff);
+                this.botCount = 3;
+                break;
+            case 'drivemad':
+                this.scene.background.set(0x2d2d2d);
+                this.scene.fog.color.set(0x2d2d2d);
+                this.botCount = 0;
+                break;
+            case 'rallyraid':
+                this.scene.background.set(0x1f2735);
+                this.scene.fog.color.set(0x1f2735);
+                this.botCount = 0;
+                break;
+            case 'monkeymart':
+                this.scene.background.set(0xe4c97f);
+                this.scene.fog.color.set(0xe4c97f);
+                this.botCount = 0;
+                break;
+            case 'spacequest':
+                this.scene.background.set(0x081b32);
+                this.scene.fog.color.set(0x081b32);
+                this.botCount = 4;
+                break;
+            case 'citybuilder':
+                this.scene.background.set(0x7fb069);
+                this.scene.fog.color.set(0x7fb069);
+                this.botCount = 0;
+                break;
+            case 'puzzlemaster':
+                this.scene.background.set(0x5d4e8b);
+                this.scene.fog.color.set(0x5d4e8b);
+                this.botCount = 0;
+                break;
+            case 'zombierush':
+                this.scene.background.set(0x3d3d37);
+                this.scene.fog.color.set(0x3d3d37);
+                this.botCount = 6;
+                break;
+            case 'skystrike':
+                this.scene.background.set(0x8bb8ff);
+                this.scene.fog.color.set(0x8bb8ff);
+                this.botCount = 5;
+                break;
+            case 'mechwars':
+                this.scene.background.set(0x40404b);
+                this.scene.fog.color.set(0x40404b);
+                this.botCount = 6;
+                break;
+            case 'tinyfishing':
+                this.scene.background.set(0x5287b5);
+                this.scene.fog.color.set(0x5287b5);
+                this.botCount = 0;
+                break;
+            default:
+                this.scene.background.set(0x87ceeb);
+                this.scene.fog.color.set(0x87ceeb);
+        }
+    }
+
     createTerrain() {
-        // Ground plane with texture-like appearance
-        const groundGeometry = new THREE.PlaneGeometry(500, 500);
-        const groundMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x3a5a2d,
+        if (this.gameMode === 'minecraft') {
+            this.createBlockTerrain();
+            return;
+        }
+
+        const isRacing = this.gameMode === 'drivemad';
+        const isFishing = this.gameMode === 'tinyfishing';
+
+        const groundGeometry = new THREE.PlaneGeometry(600, 600);
+        const groundMaterial = new THREE.MeshStandardMaterial({
+            color: isFishing ? 0x2d4b7a : (isRacing ? 0x2a2a2a : 0x3a5a2d),
             roughness: 0.9,
             metalness: 0.0,
-            map: this.generateTerrainTexture()
+            map: isFishing ? null : this.generateTerrainTexture()
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
         ground.receiveShadow = true;
         this.scene.add(ground);
 
-        // Add multiple hills with varied heights
-        for (let i = 0; i < 8; i++) {
-            const hillGeometry = new THREE.ConeGeometry(20 + Math.random() * 20, 15 + Math.random() * 15, 16);
-            const hillMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x2d5a2d,
-                roughness: 0.85
-            });
-            
-            const hill = new THREE.Mesh(hillGeometry, hillMaterial);
-            hill.position.x = (Math.random() - 0.5) * 300;
-            hill.position.z = (Math.random() - 0.5) * 300;
-            hill.position.y = (Math.random() - 0.3) * 5;
-            hill.castShadow = true;
-            hill.receiveShadow = true;
-            this.scene.add(hill);
+        if (isFishing) {
+            const water = new THREE.Mesh(
+                new THREE.PlaneGeometry(500, 500),
+                new THREE.MeshStandardMaterial({
+                    color: 0x3b85b5,
+                    roughness: 0.1,
+                    metalness: 0.4,
+                    transparent: true,
+                    opacity: 0.85
+                })
+            );
+            water.rotation.x = -Math.PI / 2;
+            water.position.y = 0.1;
+            this.scene.add(water);
         }
 
-        // Add trees for realism
-        this.addTrees();
+        if (isRacing) {
+            this.createRaceTrack();
+        } else {
+            for (let i = 0; i < 8; i++) {
+                const hillGeometry = new THREE.ConeGeometry(20 + Math.random() * 20, 15 + Math.random() * 15, 16);
+                const hillMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x2d5a2d,
+                    roughness: 0.85
+                });
+
+                const hill = new THREE.Mesh(hillGeometry, hillMaterial);
+                hill.position.x = (Math.random() - 0.5) * 300;
+                hill.position.z = (Math.random() - 0.5) * 300;
+                hill.position.y = (Math.random() - 0.3) * 5;
+                hill.castShadow = true;
+                hill.receiveShadow = true;
+                this.scene.add(hill);
+            }
+
+            if (this.gameMode !== 'roblox' && this.gameMode !== 'tinyfishing') {
+                this.addTrees();
+            }
+        }
     }
 
     generateTerrainTexture() {
@@ -173,6 +316,40 @@ class GameEngine {
         }
     }
 
+    createBlockTerrain() {
+        const blockSize = 10;
+        for (let x = -25; x <= 25; x += 10) {
+            for (let z = -25; z <= 25; z += 10) {
+                const block = new THREE.Mesh(
+                    new THREE.BoxGeometry(blockSize, blockSize, blockSize),
+                    new THREE.MeshStandardMaterial({ color: 0x4b7a26 })
+                );
+                block.position.set(x, blockSize / 2, z);
+                block.castShadow = true;
+                block.receiveShadow = true;
+                this.scene.add(block);
+            }
+        }
+    }
+
+    createRaceTrack() {
+        const trackMaterial = new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.9 });
+        const track = new THREE.Mesh(new THREE.PlaneGeometry(300, 80), trackMaterial);
+        track.rotation.x = -Math.PI / 2;
+        track.position.y = 0.01;
+        this.scene.add(track);
+
+        for (let i = 0; i < 14; i++) {
+            const cone = new THREE.Mesh(
+                new THREE.CylinderGeometry(1.5, 0, 3, 8),
+                new THREE.MeshStandardMaterial({ color: 0xff5500 })
+            );
+            cone.position.set((i - 7) * 18, 1.5, -30 + Math.sin(i) * 40);
+            cone.rotation.x = -Math.PI / 2;
+            this.scene.add(cone);
+        }
+    }
+
     setupAntiDetection() {
         // Detect screen recording attempts
         this.detectScreenRecording();
@@ -205,13 +382,16 @@ class GameEngine {
     }
 
     setupInput() {
+        if (this.inputBound) return;
+        this.inputBound = true;
+
         // Keyboard input
         document.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
             if (e.key === ' ') {
                 e.preventDefault();
                 this.player.shoot(this.bullets, this.ammo);
-                this.ammo--;
+                this.ammo = Math.max(0, this.ammo - 1);
                 this.updateAmmo();
             }
         });
@@ -474,21 +654,22 @@ class GameEngine {
         this.angleX = 0;
         this.angleY = 0;
 
-        // Show Sparx page
+        // Show the games menu after quitting
         document.getElementById('gameContainer').classList.add('hidden');
-        document.getElementById('sparxPage').classList.remove('hidden');
+        document.getElementById('mainMenu').classList.remove('hidden');
     }
 }
 
 // Player Aircraft with enhanced model
 class PlayerAircraft {
-    constructor(scene) {
+    constructor(scene, type = 'aircraft') {
         this.scene = scene;
-        this.position = { x: 0, y: 15, z: 0 };
+        this.type = type;
+        this.position = { x: 0, y: type === 'tank' ? 5 : 15, z: 0 };
         this.velocity = { x: 0, y: 0, z: 0 };
         this.rotationX = 0;
         this.rotationY = 0;
-        this.speed = 0.3;
+        this.speed = type === 'tank' ? 0.18 : 0.3;
         this.acceleration = 0.95;
         
         this.createMesh();
@@ -497,48 +678,67 @@ class PlayerAircraft {
     createMesh() {
         const group = new THREE.Group();
 
-        // Fuselage
-        const fuselageGeometry = new THREE.BoxGeometry(0.5, 0.4, 1.5);
-        const fuselageMaterial = new THREE.MeshPhongMaterial({ color: 0x3498db, shininess: 100 });
-        const fuselage = new THREE.Mesh(fuselageGeometry, fuselageMaterial);
-        fuselage.castShadow = true;
-        fuselage.receiveShadow = true;
-        group.add(fuselage);
+        if (this.type === 'tank') {
+            const bodyGeometry = new THREE.BoxGeometry(2.5, 1, 4);
+            const bodyMaterial = new THREE.MeshPhongMaterial({ color: 0x4b4b4b, shininess: 50 });
+            const body = new THREE.Mesh(bodyGeometry, bodyMaterial);
+            body.castShadow = true;
+            body.receiveShadow = true;
+            group.add(body);
 
-        // Wings
-        const wingGeometry = new THREE.BoxGeometry(2.5, 0.1, 0.5);
-        const wingMaterial = new THREE.MeshPhongMaterial({ color: 0x2980b9 });
-        const wings = new THREE.Mesh(wingGeometry, wingMaterial);
-        wings.position.y = 0.15;
-        wings.castShadow = true;
-        wings.receiveShadow = true;
-        group.add(wings);
+            const turretGeometry = new THREE.CylinderGeometry(0.7, 0.7, 0.8, 16);
+            const turretMaterial = new THREE.MeshPhongMaterial({ color: 0x333333 });
+            const turret = new THREE.Mesh(turretGeometry, turretMaterial);
+            turret.position.y = 0.75;
+            turret.castShadow = true;
+            group.add(turret);
 
-        // Tail
-        const tailGeometry = new THREE.BoxGeometry(0.3, 0.6, 1);
-        const tailMaterial = new THREE.MeshPhongMaterial({ color: 0x1f618d });
-        const tail = new THREE.Mesh(tailGeometry, tailMaterial);
-        tail.position.z = -0.8;
-        tail.position.y = 0.3;
-        tail.castShadow = true;
-        tail.receiveShadow = true;
-        group.add(tail);
+            const barrelGeometry = new THREE.CylinderGeometry(0.12, 0.12, 3.5, 10);
+            const barrelMaterial = new THREE.MeshPhongMaterial({ color: 0x222222 });
+            const barrel = new THREE.Mesh(barrelGeometry, barrelMaterial);
+            barrel.rotation.z = Math.PI / 2;
+            barrel.position.set(1.4, 0.9, 0);
+            barrel.castShadow = true;
+            group.add(barrel);
+        } else {
+            const fuselageGeometry = new THREE.BoxGeometry(0.5, 0.4, 1.5);
+            const fuselageMaterial = new THREE.MeshPhongMaterial({ color: 0x3498db, shininess: 100 });
+            const fuselage = new THREE.Mesh(fuselageGeometry, fuselageMaterial);
+            fuselage.castShadow = true;
+            fuselage.receiveShadow = true;
+            group.add(fuselage);
 
-        // Cockpit
-        const cockpitGeometry = new THREE.SphereGeometry(0.2, 8, 8);
-        const cockpitMaterial = new THREE.MeshPhongMaterial({ color: 0x1a1a1a });
-        const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
-        cockpit.position.y = 0.4;
-        cockpit.position.z = 0.3;
-        cockpit.castShadow = true;
-        group.add(cockpit);
+            const wingGeometry = new THREE.BoxGeometry(2.5, 0.1, 0.5);
+            const wingMaterial = new THREE.MeshPhongMaterial({ color: 0x2980b9 });
+            const wings = new THREE.Mesh(wingGeometry, wingMaterial);
+            wings.position.y = 0.15;
+            wings.castShadow = true;
+            wings.receiveShadow = true;
+            group.add(wings);
 
-        // Engine glow
-        const engineGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.2);
-        const engineMaterial = new THREE.MeshBasicMaterial({ color: 0xff8800 });
-        const engine = new THREE.Mesh(engineGeometry, engineMaterial);
-        engine.position.z = -0.9;
-        group.add(engine);
+            const tailGeometry = new THREE.BoxGeometry(0.3, 0.6, 1);
+            const tailMaterial = new THREE.MeshPhongMaterial({ color: 0x1f618d });
+            const tail = new THREE.Mesh(tailGeometry, tailMaterial);
+            tail.position.z = -0.8;
+            tail.position.y = 0.3;
+            tail.castShadow = true;
+            tail.receiveShadow = true;
+            group.add(tail);
+
+            const cockpitGeometry = new THREE.SphereGeometry(0.2, 8, 8);
+            const cockpitMaterial = new THREE.MeshPhongMaterial({ color: 0x1a1a1a });
+            const cockpit = new THREE.Mesh(cockpitGeometry, cockpitMaterial);
+            cockpit.position.y = 0.4;
+            cockpit.position.z = 0.3;
+            cockpit.castShadow = true;
+            group.add(cockpit);
+
+            const engineGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.2);
+            const engineMaterial = new THREE.MeshBasicMaterial({ color: 0xff8800 });
+            const engine = new THREE.Mesh(engineGeometry, engineMaterial);
+            engine.position.z = -0.9;
+            group.add(engine);
+        }
 
         this.mesh = group;
         this.scene.add(group);

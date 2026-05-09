@@ -156,83 +156,32 @@
             </div>
             
             <div class="menu-section">
-                <h2>🎯 War Thunder Gamemodes</h2>
-                <div class="games-grid">
-                    <div class="game-card featured" data-game="warthunder">
-                        <div class="game-icon">✈️</div>
-                        <h3>Aerial Combat</h3>
-                        <p>Dogfight in the skies</p>
-                        <div class="game-status">Ready</div>
+                <h2>🎮 Game Library</h2>
+                <div id="categoriesBar" class="categories-bar"></div>
+                <div class="games-grid" id="gameGrid"></div>
+            </div>
+
+            <div id="gameDetails" class="game-details hidden">
+                <div class="details-card">
+                    <div class="details-header">
+                        <div>
+                            <h3 id="detailsTitle">Select a game to see details</h3>
+                            <p id="detailsDescription">Click any title to view similar games by category.</p>
+                        </div>
+                        <span id="detailsCategory" class="details-category"></span>
                     </div>
-                    <div class="game-card" data-game="warthunder_tanks">
-                        <div class="game-icon">🚗</div>
-                        <h3>Tank Combat</h3>
-                        <p>Ground warfare battles</p>
-                        <div class="game-status">Ready</div>
+                    <div class="details-meta">
+                        <span>Mode: <strong id="detailsMode">N/A</strong></span>
+                        <span>Difficulty: <strong id="detailsDifficulty">N/A</strong></span>
                     </div>
-                    <div class="game-card" data-game="survival">
-                        <div class="game-icon">🛡️</div>
-                        <h3>Survival Mode</h3>
-                        <p>Last as long as you can</p>
-                        <div class="game-status">Ready</div>
-                    </div>
-                    <div class="game-card" data-game="training">
-                        <div class="game-icon">🎯</div>
-                        <h3>Training Academy</h3>
-                        <p>Learn the basics</p>
-                        <div class="game-status">Ready</div>
-                    </div>
-                    <div class="game-card" data-game="endless">
-                        <div class="game-icon">♾️</div>
-                        <h3>Endless Mode</h3>
-                        <p>Never-ending action</p>
-                        <div class="game-status">Ready</div>
-                    </div>
-                    <div class="game-card" data-game="challenge">
-                        <div class="game-icon">👑</div>
-                        <h3>Boss Challenge</h3>
-                        <p>Face ultimate commanders</p>
-                        <div class="game-status">Ready</div>
+                    <button id="playNowButton" class="btn-primary play-now-button">Play Now</button>
+                    <div class="details-similar">
+                        <h4>More games like this</h4>
+                        <div id="similarGames" class="games-grid similar-grid"></div>
                     </div>
                 </div>
             </div>
-            
-            <div class="menu-section">
-                <h2>🎮 Other Games</h2>
-                <div class="games-grid">
-                    <div class="game-card coming-soon" data-game="minecraft">
-                        <div class="game-icon">🟫</div>
-                        <h3>Minecraft</h3>
-                        <p>Build and explore</p>
-                        <div class="game-status">Coming Soon</div>
-                    </div>
-                    <div class="game-card coming-soon" data-game="roblox">
-                        <div class="game-icon">🎮</div>
-                        <h3>Roblox</h3>
-                        <p>Play user-created games</p>
-                        <div class="game-status">Coming Soon</div>
-                    </div>
-                    <div class="game-card coming-soon" data-game="drivemad">
-                        <div class="game-icon">🏎️</div>
-                        <h3>Drive Mad</h3>
-                        <p>Crazy car racing</p>
-                        <div class="game-status">Coming Soon</div>
-                    </div>
-                    <div class="game-card coming-soon" data-game="monkeymart">
-                        <div class="game-icon">🐒</div>
-                        <h3>Monkey Mart</h3>
-                        <p>Manage your store</p>
-                        <div class="game-status">Coming Soon</div>
-                    </div>
-                    <div class="game-card coming-soon" data-game="tinyfishing">
-                        <div class="game-icon">🎣</div>
-                        <h3>Tiny Fishing</h3>
-                        <p>Relaxing fishing game</p>
-                        <div class="game-status">Coming Soon</div>
-                    </div>
-                </div>
-            </div>
-            
+
             <div class="menu-section ai-section">
                 <h2>🤖 AI Assistant</h2>
                 <button id="openAI" class="btn-ai">Open Chat Bot</button>
@@ -242,13 +191,25 @@
         <button id="logoutMenu" class="btn-secondary">Logout</button>
     </div>
 
+    <button id="homeShortcutButton" class="btn-home" title="Return to Sparx Science">Home</button>
+
     <!-- Game Container -->
     <div id="gameContainer" class="game-container hidden">
         <div id="gameHUD" class="game-hud">
+            <div class="hud-header">
+                <div>
+                    <h2 id="gameTitle">Sparx Combat</h2>
+                    <p id="gameModeText">War Thunder Mode</p>
+                </div>
+                <div class="hud-enemies">Enemies: <span id="enemyCountText">0</span></div>
+            </div>
             <div class="hud-top">
-                <div class="hud-score">Score: <span id="scoreDisplay">0</span></div>
-                <div class="hud-health">Health: <span id="healthDisplay">100</span></div>
-                <div class="hud-ammo">Ammo: <span id="ammoDisplay">120</span></div>
+                <div class="hud-score">Score: <span id="scoreText">0</span></div>
+                <div class="hud-health">
+                    <div class="health-meta">Health: <span id="healthText">100%</span></div>
+                    <div class="health-bar"><div id="healthFill" class="health-fill"></div></div>
+                </div>
+                <div class="hud-ammo">Ammo: <span id="ammoText">120</span></div>
             </div>
             <div class="hud-bottom">
                 <button id="quitGame" class="btn-secondary">Quit Game</button>
