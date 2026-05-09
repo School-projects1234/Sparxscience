@@ -99,15 +99,10 @@ class SparxScience {
     }
 
     checkCurrentAccount() {
-        if (!this.currentAccount) {
-            this.showRestrictedState();
-            return;
-        }
-
-        if (this.isAuthorizedAccount(this.currentAccount)) {
-            this.grantAccess();
-        } else {
-            this.showRestrictedState();
+        // Skip access system - directly show game menu
+        this.sparxPage.classList.add('hidden');
+        if (window.menuSystem) {
+            window.menuSystem.showMenu();
         }
     }
 
