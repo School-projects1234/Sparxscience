@@ -630,6 +630,13 @@ class SparxScience {
             });
         });
 
+        // Start Lesson button
+        document.querySelector('.btn-primary').addEventListener('click', () => {
+            if (window.menuSystem) {
+                window.menuSystem.showMenu();
+            }
+        });
+
         // Update progress daily
         setInterval(() => this.updateProgress(), 1000 * 60 * 60); // Check every hour
     }

@@ -119,6 +119,131 @@
         </footer>
     </div>
 
+    <!-- Main Game Menu -->
+    <div id="mainMenu" class="main-menu hidden">
+        <div class="menu-header">
+            <div class="menu-logo">
+                <span class="logo-icon">🎮</span>
+                <h1>Sparx Games</h1>
+            </div>
+            <div class="menu-ai-logo">
+                <span class="ai-icon">🤖</span>
+            </div>
+            <p>Choose your battle mode</p>
+        </div>
+        
+        <div class="menu-content">
+            <div class="menu-section" id="recentlyPlayedSection">
+                <h2>🕒 Recently Played</h2>
+                <div class="games-grid" id="recentlyPlayedGrid">
+                    <!-- Recently played games will be populated here -->
+                </div>
+            </div>
+            
+            <div class="menu-section">
+                <h2>🎯 Featured Games</h2>
+                <div class="games-grid">
+                    <div class="game-card featured" data-game="warthunder">
+                        <div class="game-icon">✈️</div>
+                        <h3>Sky Dominance</h3>
+                        <p>Dogfight in the skies</p>
+                        <div class="game-status">Ready</div>
+                    </div>
+                    <div class="game-card" data-game="survival">
+                        <div class="game-icon">🛡️</div>
+                        <h3>Survival Challenge</h3>
+                        <p>Last as long as you can</p>
+                        <div class="game-status">Ready</div>
+                    </div>
+                    <div class="game-card" data-game="training">
+                        <div class="game-icon">🎯</div>
+                        <h3>Training Academy</h3>
+                        <p>Learn the basics</p>
+                        <div class="game-status">Ready</div>
+                    </div>
+                    <div class="game-card" data-game="endless">
+                        <div class="game-icon">♾️</div>
+                        <h3>Endless Mode</h3>
+                        <p>Never-ending action</p>
+                        <div class="game-status">Ready</div>
+                    </div>
+                    <div class="game-card" data-game="challenge">
+                        <div class="game-icon">👑</div>
+                        <h3>Boss Challenge</h3>
+                        <p>Face the ultimate enemy</p>
+                        <div class="game-status">Ready</div>
+                    </div>
+                    <div class="game-card coming-soon" data-game="minecraft">
+                        <div class="game-icon">🟫</div>
+                        <h3>Minecraft</h3>
+                        <p>Build and explore</p>
+                        <div class="game-status">Coming Soon</div>
+                    </div>
+                    <div class="game-card coming-soon" data-game="roblox">
+                        <div class="game-icon">🎮</div>
+                        <h3>Roblox</h3>
+                        <p>Play user-created games</p>
+                        <div class="game-status">Coming Soon</div>
+                    </div>
+                    <div class="game-card coming-soon" data-game="drivemad">
+                        <div class="game-icon">🏎️</div>
+                        <h3>Drive Mad</h3>
+                        <p>Crazy car racing</p>
+                        <div class="game-status">Coming Soon</div>
+                    </div>
+                    <div class="game-card coming-soon" data-game="monkeymart">
+                        <div class="game-icon">🐒</div>
+                        <h3>Monkey Mart</h3>
+                        <p>Manage your store</p>
+                        <div class="game-status">Coming Soon</div>
+                    </div>
+                    <div class="game-card coming-soon" data-game="tinyfishing">
+                        <div class="game-icon">🎣</div>
+                        <h3>Tiny Fishing</h3>
+                        <p>Relaxing fishing game</p>
+                        <div class="game-status">Coming Soon</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="menu-section ai-section">
+                <h2>🤖 AI Assistant</h2>
+                <button id="openAI" class="btn-ai">Open Chat Bot</button>
+            </div>
+        </div>
+        
+        <button id="logoutMenu" class="btn-secondary">Logout</button>
+    </div>
+
+    <!-- Game Container -->
+    <div id="gameContainer" class="game-container hidden">
+        <div id="gameHUD" class="game-hud">
+            <div class="hud-top">
+                <div class="hud-score">Score: <span id="scoreDisplay">0</span></div>
+                <div class="hud-health">Health: <span id="healthDisplay">100</span></div>
+                <div class="hud-ammo">Ammo: <span id="ammoDisplay">120</span></div>
+            </div>
+            <div class="hud-bottom">
+                <button id="quitGame" class="btn-secondary">Quit Game</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chat Container -->
+    <div id="aiContainer" class="ai-container hidden">
+        <div class="ai-chat">
+            <div class="ai-header">
+                <h2>🤖 AI Assistant</h2>
+                <button id="backToMenuAI" class="close-ai">×</button>
+            </div>
+            <div id="chatMessages" class="chat-messages"></div>
+            <div class="chat-input-area">
+                <input type="text" id="chatInput" placeholder="Ask me anything..." autocomplete="off">
+                <button id="sendMessage" class="btn-primary">Send</button>
+            </div>
+        </div>
+    </div>
+
     <!-- CAPTCHA Modal -->
     <div id="captchaModal" class="modal hidden">
         <div class="modal-content captcha-container">
