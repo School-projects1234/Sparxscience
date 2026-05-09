@@ -11,13 +11,28 @@
     <div id="accessOverlay" class="access-overlay">
         <div class="access-card">
             <h2>Restricted Access</h2>
-            <p id="accessMessage">Sorry., you do not have access to this, please submit an access request by pressing this button.</p>
-            <input type="text" id="accountInput" placeholder="your.email@gmail.com" autocomplete="username">
-            <div class="access-buttons">
-                <button id="signInButton" class="btn-primary">Sign in</button>
-                <button id="requestAccessButton" class="btn-secondary hidden">Request Access</button>
+            <div id="userLoginMode">
+                <p id="accessMessage">Sorry., you do not have access to this, please submit an access request by pressing this button.</p>
+                <input type="text" id="accountInput" placeholder="your.email@gmail.com" autocomplete="username">
+                <div class="access-buttons">
+                    <button id="signInButton" class="btn-primary">Sign in</button>
+                    <button id="requestAccessButton" class="btn-secondary hidden">Request Access</button>
+                </div>
+                <p id="accessStatus" class="access-status">Only approved Google accounts may use this website.</p>
+                <p style="text-align: center; margin-top: 15px;">
+                    <a href="#" id="switchToAdminMode" style="color: #667eea; text-decoration: none; font-size: 12px;">Enter Admin Mode</a>
+                </p>
             </div>
-            <p id="accessStatus" class="access-status">Only approved Google accounts may use this website.</p>
+            
+            <div id="adminLoginMode" style="display: none;">
+                <p id="adminMessage">Enter admin password to access the admin panel:</p>
+                <input type="password" id="adminPasswordInput" placeholder="Enter admin password" autocomplete="off">
+                <div class="access-buttons">
+                    <button id="verifyAdminButton" class="btn-primary">Verify</button>
+                    <button id="backToUserMode" class="btn-secondary">Back to User Login</button>
+                </div>
+                <p id="adminStatus" class="access-status"></p>
+            </div>
         </div>
     </div>
 

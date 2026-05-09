@@ -71,6 +71,20 @@ class SparxScience {
         this.adminToolsButton.addEventListener('click', () => this.showAdminVerification());
         document.getElementById('closeAdminPanel').addEventListener('click', () => this.hideAdminPanel());
 
+        // Admin mode event listeners
+        document.getElementById('switchToAdminMode').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.switchToAdminMode();
+        });
+        document.getElementById('backToUserMode').addEventListener('click', (e) => {
+            e.preventDefault();
+            this.switchToUserMode();
+        });
+        document.getElementById('verifyAdminButton').addEventListener('click', () => this.verifyAdminPassword());
+        document.getElementById('adminPasswordInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.verifyAdminPassword();
+        });
+
         // Create secret trigger element
         this.secretTrigger = document.createElement('div');
         this.secretTrigger.className = 'secret-trigger';
@@ -96,6 +110,64 @@ class SparxScience {
     showAccessOverlay() {
         this.accessOverlay.classList.remove('hidden');
         this.sparxPage.classList.add('blurred');
+        // Reset to user mode when showing overlay
+        this.switchToUserMode();
+    }
+
+    switchToAdminMode() {
+        document.getElementById('userLoginMode').style.display = 'none';
+        document.getElementById('adminLoginMode').style.display = 'block';
+        document.getElementById('adminPasswordInput').value = '';
+        document.getElementById('adminStatus').textContent = '';
+        document.getElementById('adminPasswordInput').focus();
+    }
+
+    switchToUserMode() {
+        document.getElementById('userLoginMode').style.display = 'block';
+        document.getElementById('adminLoginMode').style.display = 'none';
+        document.getElementById('adminPasswordInput').value = '';
+        document.getElementById('adminStatus').textContent = '';
+    }
+
+    verifyAdminPassword() {
+        const enteredPassword = document.getElementById('adminPasswordInput').value;
+        const adminStatus = document.getElementById('adminStatus');
+
+        // The correct admin password (same as in passcode.js, decoded: "082818")
+        const correctPassword = '082818';
+
+        if (enteredPassword.toUpperCase() === correctPassword) {
+            // Correct password - grant admin access
+            adminStatus.textContent = 'Password correct! Granting admin access...';
+            adminStatus.style.color = '#28a745';
+            document.getElementById('adminPasswordInput').value = '';
+
+            setTimeout(() => {
+                this.currentAccount = this.adminEmail;
+                localStorage.setItem('sparxScienceCurrentAccount', this.adminEmail);
+                this.grantAccess();
+                this.accessOverlay.classList.add('hidden');
+                this.sparxPage.classList.remove('blurred');
+                // Show admin tools button
+                this.adminToolsButton.classList.remove('hidden');
+                // Open admin panel
+                setTimeout(() => {
+                    this.openAdminPanel();
+                }, 500);
+            }, 500);
+        } else {
+            // Wrong password
+            adminStatus.textContent = 'Incorrect password. Please submit an access request in User Mode.';
+            adminStatus.style.color = '#dc3545';
+            document.getElementById('adminPasswordInput').value = '';
+            
+            // Allow switching back to user mode to submit request
+            setTimeout(() => {
+                this.switchToUserMode();
+                document.getElementById('accessMessage').textContent = 'Access Denied';
+                this.requestAccessButton.classList.remove('hidden');
+            }, 1500);
+        }
     }
 
     checkCurrentAccount() {
