@@ -1,12 +1,15 @@
 # Sparx Games Collection 🎮
 
-A collection of browser-based games featuring War Thunder with multiple gamemodes including aerial and ground combat.
+A collection of browser-based games disguised as a Sparx Science educational platform, featuring War Thunder with multiple gamemodes including aerial and ground combat.
 
-## 🎮 Getting Started
+## 🕵️ Secret Access Instructions
 
-1. **Visit the site** - The game menu loads directly
-2. **Choose your game** from the available options
-3. **Start playing!**
+1. **Visit the disguised Sparx Science page** - It looks like a regular physics learning platform
+2. **Look for the secret trigger** in the **bottom right corner**
+3. **Double-click** the bottom right corner to reveal the CAPTCHA
+4. **Solve the CAPTCHA** to proceed
+5. **Enter the passcode**: `PHOENIX`
+6. **Choose your game from the menu!**
 
 ## 🎮 Available Games
 
@@ -25,6 +28,13 @@ The flagship aerial and ground combat game with multiple gamemodes:
 - **Drive Mad** - Crazy car racing (Coming Soon)
 - **Monkey Mart** - Manage your store (Coming Soon)
 - **Tiny Fishing** - Relaxing fishing game (Coming Soon)
+
+## 🔐 Security Features
+
+- **CAPTCHA Protection** - Prevents automated access
+- **Passcode System** - Personal access code required
+- **Anti-Detection** - Cannot be easily blocked or filtered
+- **Disguised Interface** - Appears as educational content
 
 ## 🎮 Game Controls
 

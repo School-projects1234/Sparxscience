@@ -7,11 +7,25 @@
 Visit: https://School-projects1234.github.io/Sparxscience
 ```
 
-### Step 2: Choose Your Game
+### Step 2: Find the Secret
+- Look at the **bottom right corner** of the page
+- **Double-click** the small area (it won't be visible!)
+
+### Step 3: Solve the CAPTCHA
+- Read the distorted code in the box
+- Type it in the input field
+- Click "Verify"
+
+### Step 4: Enter Passcode
+- The secret code is: **PHOENIX**
+- Type it in the password field
+- Click "Submit"
+
+### Step 5: Choose Your Game
 - Select from War Thunder gamemodes (Aerial, Tank, Survival, etc.)
 - Or try other games (coming soon)
 
-### Step 3: Play!
+### Step 6: Play!
 - **WASD or Arrows** - Move your vehicle
 - **Mouse** - Look around and aim
 - **Click or Space** - Fire weapons
