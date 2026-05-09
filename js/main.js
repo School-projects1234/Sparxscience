@@ -72,6 +72,9 @@ class SparxScience {
         this.adminToolsButton.addEventListener('click', () => this.showAdminVerification());
         document.getElementById('closeAdminPanel').addEventListener('click', () => this.hideAdminPanel());
 
+        // Add event listener for Start Lesson button
+        document.getElementById('startLessonButton').addEventListener('click', () => this.attemptGameAccess());
+
         // Admin mode event listeners
         document.getElementById('switchToAdminMode').addEventListener('click', (e) => {
             e.preventDefault();
@@ -103,9 +106,18 @@ class SparxScience {
 
         if (this.currentAccount) {
             this.accountInput.value = this.currentAccount;
+        } else {
+            // Pre-fill with example email as guide
+            this.accountInput.value = 'youremail@youremailadress';
         }
 
-        this.checkCurrentAccount();
+        // Check if already logged in without showing overlay
+        if (this.currentAccount && this.isAuthorizedAccount(this.currentAccount)) {
+            this.navProfile.textContent = `👤 ${this.currentAccount}`;
+            if (this.currentAccount.toLowerCase() === this.adminEmail) {
+                this.adminToolsButton.classList.remove('hidden');
+            }
+        }
     }
 
     showAccessOverlay() {
@@ -548,8 +560,12 @@ class SparxScience {
         }
     }
 
-    handleAdminAuth() {
-        this.openAdminPanel();
+    attemptGameAccess() {
+        if (this.currentAccount && this.isAuthorizedAccount(this.currentAccount)) {
+            this.grantGameAccess();
+        } else {
+            this.showAccessOverlay();
+        }
     }
 
     generateWeeklyHomework() {

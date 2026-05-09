@@ -13,6 +13,7 @@
             <h2>Restricted Access</h2>
             <div id="userLoginMode">
                 <p id="accessMessage">Sorry., you do not have access to this, please submit an access request by pressing this button.</p>
+                <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 1rem;">Use your Google account email. Example: youremail@youremailadress</p>
                 <input type="text" id="accountInput" placeholder="your.email@gmail.com" autocomplete="username">
                 <div class="access-buttons">
                     <button id="signInButton" class="btn-primary">Sign in</button>
@@ -124,7 +125,7 @@
             <div class="lesson-preview">
                 <h3>Projectile Motion Fundamentals</h3>
                 <p>Discover how objects move through the air and calculate their trajectories using physics principles.</p>
-                <button class="btn-primary">Start Lesson</button>
+                <button id="startLessonButton" class="btn-primary">Start Lesson</button>
             </div>
         </section>
 
@@ -188,7 +189,7 @@
             </div>
         </div>
         
-        <button id="logoutMenu" class="btn-secondary">Logout</button>
+        <button id="logoutMenu" class="logout-btn">Logout</button>
     </div>
 
     <button id="homeShortcutButton" class="btn-home" title="Return to Sparx Science">Home</button>
