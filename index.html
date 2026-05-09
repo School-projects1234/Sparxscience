@@ -8,6 +8,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="accessOverlay" class="access-overlay">
+        <div class="access-card">
+            <h2>Restricted Access</h2>
+            <p id="accessMessage">Sorry., you do not have access to this, please submit an access request by pressing this button.</p>
+            <input type="text" id="accountInput" placeholder="your.email@gmail.com" autocomplete="username">
+            <div class="access-buttons">
+                <button id="signInButton" class="btn-primary">Sign in</button>
+                <button id="requestAccessButton" class="btn-secondary hidden">Request Access</button>
+            </div>
+            <p id="accessStatus" class="access-status">Only approved Google accounts may use this website.</p>
+        </div>
+    </div>
+
     <!-- Sparx Science Disguise Page -->
     <div id="sparxPage" class="sparx-container">
         <nav class="sparx-nav">
@@ -21,7 +34,10 @@
                 <a href="#" class="nav-link">Biology</a>
                 <a href="#" class="nav-link">Assignments</a>
             </div>
-            <div class="nav-profile">👤 Login</div>
+            <div class="nav-actions">
+                <div id="navProfile" class="nav-profile">👤 Login</div>
+                <button id="adminToolsButton" class="btn-secondary hidden">Admin Tools</button>
+            </div>
         </nav>
 
         <div class="sparx-header">
@@ -48,6 +64,46 @@
             </div>
         </section>
 
+        <!-- Homework Dashboard -->
+        <section id="assignments" class="homework-dashboard">
+            <div class="dashboard-header">
+                <h2>My Homework</h2>
+                <div class="progress-info">
+                    <div class="progress-bar">
+                        <div id="weeklyProgress" class="progress-fill"></div>
+                    </div>
+                    <span id="progressText">0% Complete</span>
+                </div>
+            </div>
+
+            <div class="homework-details">
+                <div class="detail-item">
+                    <h3>Current Homework</h3>
+                    <div id="currentHomework">
+                        <p>Loading...</p>
+                    </div>
+                </div>
+                <div class="detail-item">
+                    <h3>Due Date</h3>
+                    <p id="dueDate">Loading...</p>
+                </div>
+            </div>
+
+            <div class="assignments-section">
+                <h3>Assignments</h3>
+                <div id="assignmentsGrid" class="assignments-grid">
+                    <!-- Assignments will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="activity-section">
+                <h3>Recent Activity</h3>
+                <div id="activityList" class="activity-list">
+                    <!-- Activity will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
         <section class="featured">
             <h2>Today's Featured Lesson</h2>
             <div class="lesson-preview">
@@ -61,9 +117,6 @@
             <p>&copy; 2026 Sparx Science | Making Physics Fun and Accessible</p>
             <p style="font-size: 10px; opacity: 0.5;">Version 2.1.4</p>
         </footer>
-
-        <!-- Hidden Trigger (Bottom Right Corner) -->
-        <div id="secretTrigger" class="secret-trigger"></div>
     </div>
 
     <!-- CAPTCHA Modal -->
@@ -91,7 +144,7 @@
                 <button class="close-btn" id="closePasscode">&times;</button>
             </div>
             <div class="passcode-content">
-                <p>Enter your access code:</p>
+                <p>Enter your admin passcode:</p>
                 <input type="password" id="passcodeInput" placeholder="••••••" maxlength="8">
                 <button id="submitPasscode" class="btn-primary">Submit</button>
                 <p id="passcodeError" class="error-message"></p>
@@ -99,122 +152,36 @@
         </div>
     </div>
 
-    <!-- Main Menu Container -->
-    <div id="mainMenu" class="main-menu hidden">
-        <div class="menu-header">
-            <h1>🎮 Portal</h1>
-            <p>Select Your Experience</p>
-        </div>
-
-        <div class="menu-content">
-            <!-- Games Section -->
-            <div class="menu-section">
-                <h2>Available Games</h2>
-                <div class="games-scroll">
-                    <div class="game-card" data-game="warthunder">
-                        <div class="game-icon">🛩️</div>
-                        <h3>Sky Dominance</h3>
-                        <p>3D aerial combat with AI bots</p>
-                        <span class="game-status">▶ Play</span>
-                    </div>
-                    <div class="game-card" data-game="survival">
-                        <div class="game-icon">🌍</div>
-                        <h3>Survival Challenge</h3>
-                        <p>Survival mode with extreme AI</p>
-                        <span class="game-status">▶ Play</span>
-                    </div>
-                    <div class="game-card" data-game="training">
-                        <div class="game-icon">🎯</div>
-                        <h3>Training Academy</h3>
-                        <p>Learn and master the controls</p>
-                        <span class="game-status">▶ Play</span>
-                    </div>
-                    <div class="game-card" data-game="endless">
-                        <div class="game-icon">♾️</div>
-                        <h3>Endless Mode</h3>
-                        <p>Face infinite waves of enemies</p>
-                        <span class="game-status">▶ Play</span>
-                    </div>
-                    <div class="game-card" data-game="challenge">
-                        <div class="game-icon">👑</div>
-                        <h3>Boss Challenge</h3>
-                        <p>Defeat powerful enemy bosses</p>
-                        <span class="game-status">▶ Play</span>
-                    </div>
-                </div>
+    <div id="adminPanel" class="admin-panel hidden">
+        <div class="admin-card">
+            <div class="admin-header">
+                <h2>Admin Requests</h2>
+                <button class="close-btn" id="closeAdminPanel">&times;</button>
             </div>
-
-            <!-- AI Section -->
-            <div class="menu-section ai-section">
-                <h2>🤖 AI Assistant</h2>
-                <button id="openAI" class="btn-ai">Open ChatBot</button>
-            </div>
+            <p class="admin-subtitle">Review access requests from browser accounts.</p>
+            <div id="requestList" class="request-list"></div>
+            <div id="adminNotice" class="admin-notice">Approved accounts can use this site immediately after acceptance.</div>
         </div>
-
-        <button id="logoutMenu" class="btn-secondary">Logout</button>
     </div>
 
-    <!-- AI Chat Container -->
-    <div id="aiContainer" class="ai-container hidden">
-        <div class="ai-chat">
-            <div class="ai-header">
-                <h2>🤖 AI Assistant</h2>
-                <button class="close-ai" id="closeAI">✕</button>
+    <!-- Homework Modal -->
+    <div id="homeworkModal" class="modal hidden">
+        <div class="modal-content homework-container">
+            <div class="modal-header">
+                <h2 id="homeworkTitle">Homework Task</h2>
+                <button class="close-btn" id="closeHomework">&times;</button>
             </div>
-
-            <div class="chat-messages" id="chatMessages">
-                <div class="message ai-message">
-                    <p>Hello! I'm your AI assistant. Ask me anything about the games, get help, or just chat! What can I help you with?</p>
+            <div class="homework-content">
+                <div id="questionSection" class="question-section">
+                    <!-- Questions will be loaded here -->
                 </div>
-            </div>
-
-            <div class="chat-input-area">
-                <input type="text" id="chatInput" placeholder="Type your message..." maxlength="500">
-                <button id="sendMessage" class="btn-send">Send</button>
-            </div>
-        </div>
-
-        <button class="back-to-menu" id="backToMenuAI">← Back to Menu</button>
-    </div>
-
-    <!-- Game Container -->
-    <div id="gameContainer" class="game-container hidden">
-        <div id="gameHUD">
-            <div class="hud-left">
-                <div class="hud-item">
-                    <span class="hud-label">Health</span>
-                    <div class="health-bar">
-                        <div id="healthFill" class="health-fill" style="width: 100%;"></div>
-                    </div>
-                    <span id="healthText">100%</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Ammo</span>
-                    <span id="ammoText">120</span>
-                </div>
-            </div>
-            
-            <div class="hud-center">
-                <div class="crosshair"></div>
-            </div>
-            
-            <div class="hud-right">
-                <div class="hud-item">
-                    <span class="hud-label">Score</span>
-                    <span id="scoreText">0</span>
-                </div>
-                <div class="hud-item">
-                    <span class="hud-label">Enemies</span>
-                    <span id="enemyCountText">5</span>
+                <div class="question-navigation">
+                    <button id="prevQuestion" class="btn-secondary">Previous</button>
+                    <button id="nextQuestion" class="btn-primary">Next</button>
+                    <button id="submitHomework" class="btn-success">Submit Task</button>
                 </div>
             </div>
         </div>
-
-        <div id="controls-info" class="controls-info">
-            <p><strong>🎮 Controls:</strong> WASD/Arrows-Move | Mouse-Look | Click/Space-Shoot | Mobile-Touch Controls</p>
-        </div>
-
-        <button id="quitGame" class="btn-secondary">Quit to Menu</button>
     </div>
 
     <!-- Scripts -->

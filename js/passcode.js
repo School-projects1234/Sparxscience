@@ -1,13 +1,26 @@
 // Advanced Passcode Verification System with anti-brute-force
 class PasscodeSystem {
     constructor() {
-        // The secret passcode with obfuscation
-        this.correctPasscode = this.obfuscateCode('PHOENIX');
+        // The secret admin passcode is hidden as a char code array in the file
+        this.correctPasscode = this.obfuscateCode(this.decodeSecret([48, 56, 50, 56, 49, 56]));
+        this.adminEmail = this.decodeSecret([97, 100, 109, 105, 110, 64, 115, 112, 97, 114, 120, 115, 99, 105, 101, 110, 99, 101, 46, 99, 111, 109]).toLowerCase();
         this.attemptCount = 0;
         this.maxAttempts = 5;
         this.lockoutTime = 0;
         this.setupEventListeners();
         this.startAttemptMonitoring();
+    }
+
+    decodeSecret(values) {
+        if (Array.isArray(values)) {
+            return String.fromCharCode(...values);
+        }
+
+        try {
+            return atob(values);
+        } catch (e) {
+            return '';
+        }
     }
 
     obfuscateCode(code) {
@@ -56,22 +69,27 @@ class PasscodeSystem {
         const errorElement = document.getElementById('passcodeError');
         
         if (this.comparePasscode(input)) {
-            // Correct passcode
+            if (!window.sparxScience || window.sparxScience.currentAccount.toLowerCase() !== this.adminEmail) {
+                errorElement.textContent = 'Admin passcode is valid only for the admin account.';
+                errorElement.classList.remove('hidden');
+                document.getElementById('passcodeInput').value = '';
+                return false;
+            }
+
             errorElement.classList.add('hidden');
             document.getElementById('passcodeModal').classList.add('hidden');
             document.getElementById('passcodeInput').value = '';
             this.attemptCount = 0; // Reset on success
-            
+
             // Log successful verification (without exposing details)
             this.logVerification(true);
-            
-            // Show the main menu instead of directly starting the game
+
             setTimeout(() => {
-                if (window.menuSystem) {
-                    window.menuSystem.showMenu();
+                if (window.sparxScience) {
+                    window.sparxScience.handleAdminAuth();
                 }
             }, 300);
-            
+
             return true;
         } else {
             // Wrong passcode

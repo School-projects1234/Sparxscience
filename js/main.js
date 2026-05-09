@@ -1,220 +1,642 @@
-// Anti-detection and obfuscation layer
-class SecuritySystem {
+// Sparx Science Homework System
+class SparxScience {
     constructor() {
-        this.validateEnvironment();
-        this.preventDebugging();
-        this.disableConsoleLogging();
-        this.checkForMonitoringTools();
+        this.currentHomework = null;
+        this.homeworkProgress = 0;
+        this.lastHomeworkDate = null;
+        this.questions = [];
+        this.currentQuestionIndex = 0;
+        this.allowedAccounts = [];
+        this.accessRequests = [];
+        this.currentAccount = null;
+        this.adminEmail = this.decodeSecret([97,100,109,105,110,64,115,112,97,114,120,115,99,105,101,110,99,101,46,99,111,109]);
+        this.initializeApp();
+        this.generateWeeklyHomework();
+        this.updateProgress();
+        this.setupEventListeners();
     }
 
-    validateEnvironment() {
-        // Check if running in legitimate browser environment
-        if (typeof window === 'undefined') return;
-        
-        // Prevent execution in iframes or restricted contexts
+    initializeApp() {
+        // Load saved progress from localStorage
+        const saved = localStorage.getItem('sparxScience');
+        if (saved) {
+            const data = JSON.parse(saved);
+            this.homeworkProgress = data.progress || 0;
+            this.lastHomeworkDate = data.lastHomeworkDate ? new Date(data.lastHomeworkDate) : null;
+        }
+
+        this.initializeAccessControl();
+        this.updateUI();
+    }
+
+    decodeSecret(values) {
+        if (Array.isArray(values)) {
+            return String.fromCharCode(...values);
+        }
+
         try {
-            if (window.self !== window.top) {
-                // Allow parent frame but log attempt
-            }
+            return atob(values);
         } catch (e) {
-            // Cross-origin restriction - likely sandbox
+            return '';
         }
     }
 
-    preventDebugging() {
-        // Detect if developer tools are open
-        let debugOpen = false;
-        const threshold = 160;
-        
-        setInterval(() => {
-            if (window.outerHeight - window.innerHeight > threshold ||
-                window.outerWidth - window.innerWidth > threshold) {
-                debugOpen = true;
-            }
-        }, 500);
-    }
+    initializeAccessControl() {
+        this.accessOverlay = document.getElementById('accessOverlay');
+        this.accountInput = document.getElementById('accountInput');
+        this.signInButton = document.getElementById('signInButton');
+        this.requestAccessButton = document.getElementById('requestAccessButton');
+        this.accessStatus = document.getElementById('accessStatus');
+        this.navProfile = document.getElementById('navProfile');
+        this.adminToolsButton = document.getElementById('adminToolsButton');
+        this.adminPanel = document.getElementById('adminPanel');
+        this.requestList = document.getElementById('requestList');
+        this.sparxPage = document.getElementById('sparxPage');
 
-    disableConsoleLogging() {
-        // Prevent sensitive info leakage through console
-        const originalLog = console.log;
-        console.log = function(...args) {
-            // Only log if contains specific keywords
-            const str = args.join(' ');
-            if (str.includes('physics') || str.includes('education') || str.includes('error')) {
-                originalLog.apply(console, args);
-            }
-        };
-    }
-
-    checkForMonitoringTools() {
-        // Detect common monitoring/filtering tools
-        const monitoringSignatures = [
-            'websense', 'zscaler', 'fortinet', 'paloalto', 
-            'cisco', 'symantec', 'mcafee', 'kaspersky'
-        ];
-        
-        // Check user agent
-        const ua = navigator.userAgent.toLowerCase();
-        monitoringSignatures.forEach(sig => {
-            if (ua.includes(sig)) {
-                // Detected monitoring tool - still allow but note it
-            }
-        });
-    }
-}
-
-// Educational content validation (disguise)
-class ContentValidator {
-    static isEducationalContext() {
-        // Check if page contains educational keywords
-        const pageText = document.body.innerText.toLowerCase();
-        return pageText.includes('physics') || 
-               pageText.includes('science') || 
-               pageText.includes('learning') ||
-               pageText.includes('education');
-    }
-
-    static validatePageContent() {
-        // Ensure Sparx Science content is visible
-        const sparxPage = document.getElementById('sparxPage');
-        return sparxPage && !sparxPage.classList.contains('hidden');
-    }
-}
-
-// Main application controller with enhanced security
-class ApplicationController {
-    constructor() {
-        this.security = new SecuritySystem();
-        this.secretTriggerClicked = false;
-        this.clickCount = 0;
-        this.lastClickTime = 0;
-        this.accessAttempts = 0;
-        this.maxAttempts = 10; // Prevent brute force
-        this.setupSecretTrigger();
-        this.setupFailsafes();
-    }
-
-    setupSecretTrigger() {
-        const trigger = document.getElementById('secretTrigger');
-        
-        // Primary access method: bottom right corner double-click
-        trigger.addEventListener('click', () => {
-            this.handleSecretTrigger();
-        });
-
-        // Backup methods to prevent detection by single-method blocking
-        
-        // Method 1: Keyboard shortcut (Ctrl+Shift+U)
-        document.addEventListener('keydown', (e) => {
-            if (e.ctrlKey && e.shiftKey && e.key === 'U') {
-                this.handleSecretTrigger();
-            }
-        });
-
-        // Method 2: Alt+Shift+P (Phoenix)
-        document.addEventListener('keydown', (e) => {
-            if (e.altKey && e.shiftKey && e.key === 'P') {
-                this.handleSecretTrigger();
-            }
-        });
-
-        // Method 3: Triple-tap with 2-finger touch on mobile
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 2) {
-                this.accessAttempts++;
-                if (this.accessAttempts >= 3) {
-                    this.handleSecretTrigger();
-                    this.accessAttempts = 0;
-                }
-            }
-        }, false);
-
-        // Method 4: Vibration pattern on mobile (if supported)
-        if (navigator.vibrate) {
-            document.addEventListener('click', (e) => {
-                // Random trigger for mobile that won't be obviously detectable
-                if (Math.random() < 0.001 && e.clientX > window.innerWidth - 50) {
-                    navigator.vibrate(100);
-                }
-            });
+        this.allowedAccounts = JSON.parse(localStorage.getItem('sparxScienceAllowedAccounts') || '[]');
+        if (!this.allowedAccounts.includes(this.adminEmail)) {
+            this.allowedAccounts.unshift(this.adminEmail);
         }
-    }
 
-    setupFailsafes() {
-        // Prevent page from being detected as game
-        // Regularly validate educational content
-        setInterval(() => {
-            if (!ContentValidator.isEducationalContext()) {
-                // Restore educational appearance if removed
-                const header = document.querySelector('.sparx-header');
-                if (header) header.style.display = 'block';
-            }
-        }, 5000);
+        this.accessRequests = JSON.parse(localStorage.getItem('sparxScienceAccessRequests') || '[]');
+        this.currentAccount = localStorage.getItem('sparxScienceCurrentAccount') || '';
 
-        // Prevent screenshots/recording detection
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'PrintScreen' || (e.ctrlKey && e.shiftKey && e.key === 'S')) {
-                // Don't block, just note it happened
-            }
+        this.signInButton.addEventListener('click', () => this.handleSignIn());
+        this.accountInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.handleSignIn();
         });
+
+        this.requestAccessButton.addEventListener('click', () => this.submitAccessRequest());
+        this.navProfile.addEventListener('click', () => this.showAccessOverlay());
+        this.adminToolsButton.addEventListener('click', () => this.showAdminVerification());
+        document.getElementById('closeAdminPanel').addEventListener('click', () => this.hideAdminPanel());
+
+        if (this.currentAccount) {
+            this.accountInput.value = this.currentAccount;
+        }
+
+        this.checkCurrentAccount();
     }
 
-    handleSecretTrigger() {
-        // Rate limiting to prevent brute force
-        if (this.accessAttempts > this.maxAttempts) {
+    showAccessOverlay() {
+        this.accessOverlay.classList.remove('hidden');
+        this.sparxPage.classList.add('blurred');
+    }
+
+    checkCurrentAccount() {
+        if (!this.currentAccount) {
+            this.showRestrictedState();
             return;
         }
 
-        const now = Date.now();
-        
-        // Double-click detection (within 500ms)
-        if (now - this.lastClickTime < 500) {
-            this.clickCount++;
+        if (this.isAuthorizedAccount(this.currentAccount)) {
+            this.grantAccess();
         } else {
-            this.clickCount = 1;
-        }
-        
-        this.lastClickTime = now;
-
-        // Show CAPTCHA on second click or alternative methods
-        if (this.clickCount === 2 || this.accessAttempts > 0) {
-            this.showCaptcha();
-            this.clickCount = 0;
-            this.accessAttempts = 0;
+            this.showRestrictedState();
         }
     }
 
-    showCaptcha() {
-        const modal = document.getElementById('captchaModal');
+    handleSignIn() {
+        const account = this.accountInput.value.trim().toLowerCase();
+        if (!account) {
+            this.accessStatus.textContent = 'Enter a Google account email to continue.';
+            return;
+        }
+
+        this.currentAccount = account;
+        localStorage.setItem('sparxScienceCurrentAccount', account);
+
+        if (this.isAuthorizedAccount(account)) {
+            this.grantAccess();
+        } else {
+            this.showRestrictedState();
+        }
+    }
+
+    isAuthorizedAccount(account) {
+        return this.allowedAccounts.includes(account.toLowerCase());
+    }
+
+    grantAccess() {
+        this.accessOverlay.classList.add('hidden');
+        this.sparxPage.classList.remove('blurred');
+        this.navProfile.textContent = `👤 ${this.currentAccount}`;
+        this.accessStatus.textContent = 'Access granted. Welcome back!';
+        if (this.currentAccount.toLowerCase() === this.adminEmail) {
+            this.adminToolsButton.classList.remove('hidden');
+        } else {
+            this.adminToolsButton.classList.add('hidden');
+        }
+    }
+
+    showRestrictedState() {
+        this.accessOverlay.classList.remove('hidden');
+        this.sparxPage.classList.add('blurred');
+        this.accessStatus.textContent = 'Sorry., you do not have access to this, please submit an access request by pressing this button.';
+        this.requestAccessButton.classList.remove('hidden');
+        this.adminToolsButton.classList.add('hidden');
+        this.navProfile.textContent = '👤 Login';
+    }
+
+    submitAccessRequest() {
+        const account = this.currentAccount.trim().toLowerCase();
+        if (!account) {
+            this.accessStatus.textContent = 'Enter your Google account before requesting access.';
+            return;
+        }
+
+        const pending = this.accessRequests.find(req => req.account === account && req.status === 'pending');
+        if (pending) {
+            this.accessStatus.textContent = 'A request is already pending for this account.';
+            return;
+        }
+
+        const request = {
+            id: `req_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+            account,
+            browser: `${navigator.platform} | ${navigator.userAgent}`,
+            status: 'pending',
+            created: new Date().toISOString()
+        };
+
+        this.accessRequests.unshift(request);
+        this.saveAccessRequests();
+        this.accessStatus.textContent = 'Request submitted. Admin will review it shortly.';
+        this.requestAccessButton.classList.add('hidden');
+        this.renderRequestList();
+    }
+
+    saveAccessRequests() {
+        localStorage.setItem('sparxScienceAccessRequests', JSON.stringify(this.accessRequests));
+    }
+
+    saveAllowedAccounts() {
+        localStorage.setItem('sparxScienceAllowedAccounts', JSON.stringify(this.allowedAccounts));
+    }
+
+    showAdminVerification() {
+        if (this.currentAccount.toLowerCase() !== this.adminEmail) {
+            alert('Admin verification is restricted to the admin account.');
+            return;
+        }
+
+        document.getElementById('captchaModal').classList.remove('hidden');
+    }
+
+    openAdminPanel() {
+        this.accessOverlay.classList.add('hidden');
+        this.sparxPage.classList.remove('blurred');
+        this.adminPanel.classList.remove('hidden');
+        this.renderRequestList();
+    }
+
+    hideAdminPanel() {
+        this.adminPanel.classList.add('hidden');
+    }
+
+    renderRequestList() {
+        if (!this.requestList) return;
+
+        if (this.accessRequests.length === 0) {
+            this.requestList.innerHTML = '<p>No requests have been submitted yet.</p>';
+            return;
+        }
+
+        this.requestList.innerHTML = this.accessRequests.map(request => {
+            const actions = request.status === 'pending' ?
+                `<div class="request-actions">
+                    <button class="request-action-btn approve" data-action="approve" data-id="${request.id}">Approve</button>
+                    <button class="request-action-btn deny" data-action="deny" data-id="${request.id}">Deny</button>
+                 </div>` : '';
+
+            return `<div class="request-item">
+                <p><strong>Account:</strong> ${request.account}</p>
+                <p><strong>Browser:</strong> ${request.browser}</p>
+                <p><strong>Status:</strong> ${request.status}</p>
+                <p><strong>Submitted:</strong> ${new Date(request.created).toLocaleString()}</p>
+                ${actions}
+            </div>`;
+        }).join('');
+
+        this.requestList.querySelectorAll('.request-action-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const action = e.target.dataset.action;
+                const id = e.target.dataset.id;
+                if (action === 'approve') {
+                    this.updateRequestStatus(id, 'approved');
+                } else if (action === 'deny') {
+                    this.updateRequestStatus(id, 'denied');
+                }
+            });
+        });
+    }
+
+    updateRequestStatus(requestId, status) {
+        const request = this.accessRequests.find(req => req.id === requestId);
+        if (!request) return;
+
+        request.status = status;
+        request.reviewed = new Date().toISOString();
+
+        if (status === 'approved') {
+            if (!this.allowedAccounts.includes(request.account)) {
+                this.allowedAccounts.push(request.account);
+            }
+            this.saveAllowedAccounts();
+        }
+
+        this.saveAccessRequests();
+        this.renderRequestList();
+
+        if (request.account === this.currentAccount && status === 'approved') {
+            this.grantAccess();
+        }
+    }
+
+    handleAdminAuth() {
+        this.openAdminPanel();
+    }
+
+    generateWeeklyHomework() {
+        const now = new Date();
+        const currentWeek = this.getWeekNumber(now);
+
+        // Check if we need new homework (new week)
+        if (!this.lastHomeworkDate || this.getWeekNumber(this.lastHomeworkDate) !== currentWeek) {
+            this.createNewHomework();
+            this.lastHomeworkDate = now;
+            this.homeworkProgress = 0; // Reset progress for new week
+            this.saveProgress();
+        }
+    }
+
+    getWeekNumber(date) {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const dayNum = d.getUTCDay() || 7;
+        d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+    }
+
+    createNewHomework() {
+        this.currentHomework = {
+            week: this.getWeekNumber(new Date()),
+            tasks: [],
+            dueDate: this.getNextWednesday()
+        };
+
+        // Generate 6 tasks
+        for (let i = 1; i <= 6; i++) {
+            const task = {
+                id: i,
+                title: `Task ${i}: ${this.getTaskTitle(i)}`,
+                questions: [],
+                completed: false,
+                progress: 0
+            };
+
+            // Generate 6 random questions for each task
+            for (let j = 1; j <= 6; j++) {
+                task.questions.push(this.generateRandomQuestion());
+            }
+
+            this.currentHomework.tasks.push(task);
+        }
+
+        this.saveProgress();
+        this.updateUI();
+    }
+
+    getTaskTitle(taskNumber) {
+        const titles = [
+            'Forces and Motion',
+            'Electricity and Circuits',
+            'Waves and Sound',
+            'Thermodynamics',
+            'Nuclear Physics',
+            'Quantum Mechanics'
+        ];
+        return titles[taskNumber - 1] || 'Physics Concepts';
+    }
+
+    generateRandomQuestion() {
+        const questionTypes = [
+            this.createMultipleChoiceQuestion,
+            this.createCalculationQuestion,
+            this.createTrueFalseQuestion
+        ];
+
+        const randomType = questionTypes[Math.floor(Math.random() * questionTypes.length)];
+        return randomType.call(this);
+    }
+
+    createMultipleChoiceQuestion() {
+        const questions = [
+            {
+                question: "What is the SI unit of force?",
+                options: ["Newton", "Joule", "Watt", "Pascal"],
+                correct: 0
+            },
+            {
+                question: "Which of these is not a type of electromagnetic radiation?",
+                options: ["X-rays", "Sound waves", "Microwaves", "Radio waves"],
+                correct: 1
+            },
+            {
+                question: "What is the speed of light in vacuum?",
+                options: ["3 × 10^8 m/s", "3 × 10^6 m/s", "3 × 10^10 m/s", "3 × 10^4 m/s"],
+                correct: 0
+            },
+            {
+                question: "Which principle states that energy cannot be created or destroyed?",
+                options: ["Newton's First Law", "Conservation of Energy", "Ohm's Law", "Boyle's Law"],
+                correct: 1
+            },
+            {
+                question: "What is the charge of an electron?",
+                options: ["+1.6 × 10^-19 C", "-1.6 × 10^-19 C", "0 C", "+3.2 × 10^-19 C"],
+                correct: 1
+            }
+        ];
+
+        return questions[Math.floor(Math.random() * questions.length)];
+    }
+
+    createCalculationQuestion() {
+        const questions = [
+            {
+                question: "Calculate the force required to accelerate a 5kg mass at 2 m/s².",
+                options: ["10 N", "7 N", "15 N", "2.5 N"],
+                correct: 0,
+                type: "calculation"
+            },
+            {
+                question: "If a wave has a frequency of 500 Hz and wavelength of 0.6 m, what is its speed?",
+                options: ["300 m/s", "833 m/s", "0.0012 m/s", "3000 m/s"],
+                correct: 0,
+                type: "calculation"
+            },
+            {
+                question: "What is the kinetic energy of a 2kg object moving at 3 m/s?",
+                options: ["9 J", "6 J", "18 J", "4.5 J"],
+                correct: 0,
+                type: "calculation"
+            }
+        ];
+
+        return questions[Math.floor(Math.random() * questions.length)];
+    }
+
+    createTrueFalseQuestion() {
+        const questions = [
+            {
+                question: "Electrons are positively charged particles.",
+                options: ["True", "False"],
+                correct: 1
+            },
+            {
+                question: "The acceleration due to gravity on Earth is approximately 9.8 m/s².",
+                options: ["True", "False"],
+                correct: 0
+            },
+            {
+                question: "Light can travel through vacuum.",
+                options: ["True", "False"],
+                correct: 0
+            },
+            {
+                question: "Nuclear fusion occurs in the sun.",
+                options: ["True", "False"],
+                correct: 0
+            }
+        ];
+
+        return questions[Math.floor(Math.random() * questions.length)];
+    }
+
+    getNextWednesday() {
+        const now = new Date();
+        const daysUntilWednesday = (3 - now.getDay() + 7) % 7;
+        const nextWednesday = new Date(now);
+        nextWednesday.setDate(now.getDate() + daysUntilWednesday);
+        nextWednesday.setHours(9, 0, 0, 0); // 9 AM
+        return nextWednesday;
+    }
+
+    updateProgress() {
+        if (!this.lastHomeworkDate) return;
+
+        const now = new Date();
+        const daysPassed = Math.floor((now - this.lastHomeworkDate) / (1000 * 60 * 60 * 24));
+        const newProgress = Math.min(daysPassed * 10, 100);
+
+        if (newProgress !== this.homeworkProgress) {
+            this.homeworkProgress = newProgress;
+            this.saveProgress();
+            this.updateUI();
+        }
+    }
+
+    saveProgress() {
+        const data = {
+            progress: this.homeworkProgress,
+            lastHomeworkDate: this.lastHomeworkDate,
+            homework: this.currentHomework
+        };
+        localStorage.setItem('sparxScience', JSON.stringify(data));
+    }
+
+    updateUI() {
+        // Update progress bar
+        const progressBar = document.getElementById('weeklyProgress');
+        const progressText = document.getElementById('progressText');
+        if (progressBar && progressText) {
+            progressBar.style.width = `${this.homeworkProgress}%`;
+            progressText.textContent = `${this.homeworkProgress}% Complete`;
+        }
+
+        // Update due date
+        const dueDateElement = document.getElementById('dueDate');
+        if (dueDateElement && this.currentHomework) {
+            dueDateElement.textContent = this.currentHomework.dueDate.toLocaleDateString() + ' at 9:00 AM';
+        }
+
+        // Update current homework info
+        const currentHomeworkElement = document.getElementById('currentHomework');
+        if (currentHomeworkElement && this.currentHomework) {
+            currentHomeworkElement.innerHTML = `
+                <p><strong>Week ${this.currentHomework.week}</strong></p>
+                <p>6 Tasks • 36 Questions Total</p>
+                <p>Due: ${this.currentHomework.dueDate.toLocaleDateString()}</p>
+            `;
+        }
+
+        // Update assignments grid
+        this.updateAssignmentsGrid();
+
+        // Update activity
+        this.updateActivityList();
+    }
+
+    updateAssignmentsGrid() {
+        const grid = document.getElementById('assignmentsGrid');
+        if (!grid || !this.currentHomework) return;
+
+        grid.innerHTML = '';
+
+        this.currentHomework.tasks.forEach(task => {
+            const card = document.createElement('div');
+            card.className = `assignment-card ${task.completed ? 'completed' : ''}`;
+            card.onclick = () => this.openHomeworkModal(task);
+
+            card.innerHTML = `
+                <h4>${task.title}</h4>
+                <p>${task.questions.length} questions</p>
+                <div class="assignment-progress">
+                    <div class="assignment-progress-fill" style="width: ${task.progress}%"></div>
+                </div>
+                <div class="assignment-status">${task.completed ? 'Completed' : 'In Progress'}</div>
+            `;
+
+            grid.appendChild(card);
+        });
+    }
+
+    updateActivityList() {
+        const activityList = document.getElementById('activityList');
+        if (!activityList) return;
+
+        const activities = [
+            `Homework for Week ${this.currentHomework?.week || 'N/A'} generated`,
+            `Progress: ${this.homeworkProgress}% complete`,
+            `Due date: ${this.currentHomework?.dueDate?.toLocaleDateString() || 'N/A'} at 9:00 AM`,
+            'Remember to complete your tasks before the deadline!'
+        ];
+
+        activityList.innerHTML = activities.map(activity => `<p>• ${activity}</p>`).join('');
+    }
+
+    openHomeworkModal(task) {
+        const modal = document.getElementById('homeworkModal');
+        const title = document.getElementById('homeworkTitle');
+        const questionSection = document.getElementById('questionSection');
+
+        title.textContent = task.title;
+        this.questions = task.questions;
+        this.currentQuestionIndex = 0;
+
+        this.displayCurrentQuestion();
         modal.classList.remove('hidden');
-        document.getElementById('captchaInput').focus();
-        
-        // Regenerate CAPTCHA if it hasn't been already
-        if (window.captchaSystem) {
-            window.captchaSystem.generateNewCode();
+    }
+
+    displayCurrentQuestion() {
+        const questionSection = document.getElementById('questionSection');
+        const question = this.questions[this.currentQuestionIndex];
+
+        questionSection.innerHTML = `
+            <div class="question">
+                <h4>Question ${this.currentQuestionIndex + 1} of ${this.questions.length}</h4>
+                <p>${question.question}</p>
+                <div class="question-options">
+                    ${question.options.map((option, index) => `
+                        <div class="question-option" data-index="${index}" onclick="sparxScience.selectAnswer(${index})">
+                            ${option}
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+
+        this.updateNavigationButtons();
+    }
+
+    selectAnswer(index) {
+        // Remove previous selection
+        document.querySelectorAll('.question-option').forEach(option => {
+            option.classList.remove('selected');
+        });
+
+        // Select new answer
+        event.target.classList.add('selected');
+
+        // Store answer (in a real system, you'd validate it)
+        this.questions[this.currentQuestionIndex].selectedAnswer = index;
+    }
+
+    updateNavigationButtons() {
+        const prevBtn = document.getElementById('prevQuestion');
+        const nextBtn = document.getElementById('nextQuestion');
+        const submitBtn = document.getElementById('submitHomework');
+
+        prevBtn.style.display = this.currentQuestionIndex > 0 ? 'block' : 'none';
+        nextBtn.style.display = this.currentQuestionIndex < this.questions.length - 1 ? 'block' : 'none';
+        submitBtn.style.display = this.currentQuestionIndex === this.questions.length - 1 ? 'block' : 'none';
+    }
+
+    nextQuestion() {
+        if (this.currentQuestionIndex < this.questions.length - 1) {
+            this.currentQuestionIndex++;
+            this.displayCurrentQuestion();
         }
+    }
+
+    prevQuestion() {
+        if (this.currentQuestionIndex > 0) {
+            this.currentQuestionIndex--;
+            this.displayCurrentQuestion();
+        }
+    }
+
+    submitHomework() {
+        // Mark current task as completed
+        const currentTask = this.currentHomework.tasks.find(task =>
+            task.title === document.getElementById('homeworkTitle').textContent
+        );
+
+        if (currentTask) {
+            currentTask.completed = true;
+            currentTask.progress = 100;
+        }
+
+        this.saveProgress();
+        this.updateUI();
+
+        // Close modal
+        document.getElementById('homeworkModal').classList.add('hidden');
+
+        // Show success message
+        alert('Task completed successfully!');
+    }
+
+    setupEventListeners() {
+        // Modal close buttons
+        document.getElementById('closeHomework').addEventListener('click', () => {
+            document.getElementById('homeworkModal').classList.add('hidden');
+        });
+
+        // Navigation buttons
+        document.getElementById('nextQuestion').addEventListener('click', () => this.nextQuestion());
+        document.getElementById('prevQuestion').addEventListener('click', () => this.prevQuestion());
+        document.getElementById('submitHomework').addEventListener('click', () => this.submitHomework());
+
+        // Nav links
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = link.textContent.toLowerCase();
+                if (target === 'assignments') {
+                    document.getElementById('assignments').scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Update progress daily
+        setInterval(() => this.updateProgress(), 1000 * 60 * 60); // Check every hour
     }
 }
 
-// Initialize with security checks
-let appController;
-
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        // Validate we're in educational context before initializing
-        if (ContentValidator.isEducationalContext()) {
-            appController = new ApplicationController();
-        }
-    });
-} else {
-    if (ContentValidator.isEducationalContext()) {
-        appController = new ApplicationController();
-    }
-}
-
-// Smooth scroll for any links and prevent detection
-document.addEventListener('click', (e) => {
-    if (e.target.tagName === 'A' && e.target.getAttribute('href')?.startsWith('#')) {
-        e.preventDefault();
-    }
+// Initialize the app
+let sparxScience;
+document.addEventListener('DOMContentLoaded', () => {
+    sparxScience = new SparxScience();
 });
