@@ -18,7 +18,6 @@ The game cannot be blocked by monitoring a single access method:
 
 3. **Keyboard Shortcut #2: Alt+Shift+P** (backup)
    - Secondary keyboard shortcut
-   - "P" for Phoenix (the passcode hint)
 
 4. **Mobile Two-Finger Tap** (triple-tap trigger)
    - Mobile-specific access method
@@ -101,12 +100,6 @@ The CAPTCHA is designed to defeat optical character recognition:
    - Copy/paste disabled on passcode field
    - Forces manual entry
    - Prevents password manager access
-
-### Default Passcode: PHOENIX
-**Note:** Change this in `js/passcode.js` line 6 before deployment:
-```javascript
-this.correctPasscode = this.obfuscateCode('YOUR_NEW_CODE');
-```
 
 ## 🚫 Content Filter Evasion
 

@@ -1,6 +1,6 @@
 # War Thunder Browser Game 🎮
 
-A 3D War Thunder-like aerial combat game playable in your browser with a secret access system.
+A 3D War Thunder-like combat game playable in your browser with a secret access system.
 
 ## 🕵️ Secret Access Instructions
 
@@ -57,22 +57,6 @@ A 3D War Thunder-like aerial combat game playable in your browser with a secret 
 - **Particle-like Effects** - Visual feedback for gameplay
 - **Responsive Design** - Works on desktop and mobile
 - **Smooth Physics** - Realistic aircraft movement
-
-## 🚀 Deployment to GitHub Pages
-
-1. Push your code to GitHub
-2. Go to repository Settings → Pages
-3. Select "Deploy from a branch"
-4. Choose `main` branch and `/root` folder
-5. Your game will be live at `https://username.github.io/Sparxscience`
-
-## 🎨 Customization
-
-### Change the Passcode
-Edit `js/passcode.js` line 6:
-```javascript
-this.correctPasscode = 'YOUR_CODE_HERE';
-```
 
 ### Adjust Bot Difficulty
 Edit `js/bots.js` to modify:
