@@ -71,6 +71,21 @@ class SparxScience {
         this.adminToolsButton.addEventListener('click', () => this.showAdminVerification());
         document.getElementById('closeAdminPanel').addEventListener('click', () => this.hideAdminPanel());
 
+        // Create secret trigger element
+        this.secretTrigger = document.createElement('div');
+        this.secretTrigger.className = 'secret-trigger';
+        this.secretTrigger.title = 'Secret access trigger';
+        document.body.appendChild(this.secretTrigger);
+
+        // Add secret trigger event listeners
+        this.secretTrigger.addEventListener('dblclick', () => this.revealCaptcha());
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.shiftKey && e.key === 'U') {
+                e.preventDefault();
+                this.revealCaptcha();
+            }
+        });
+
         if (this.currentAccount) {
             this.accountInput.value = this.currentAccount;
         }
@@ -126,6 +141,24 @@ class SparxScience {
             this.adminToolsButton.classList.remove('hidden');
         } else {
             this.adminToolsButton.classList.add('hidden');
+        }
+    }
+
+    revealCaptcha() {
+        // Hide access overlay and show CAPTCHA modal
+        this.accessOverlay.classList.add('hidden');
+        this.sparxPage.classList.remove('blurred');
+        document.getElementById('captchaModal').classList.remove('hidden');
+        // Regenerate CAPTCHA code
+        if (window.captchaSystem) {
+            window.captchaSystem.generateNewCode();
+        }
+    }
+
+    grantGameAccess() {
+        // Hide sparx page and show game menu
+        if (window.menuSystem) {
+            window.menuSystem.showMenu();
         }
     }
 
@@ -192,6 +225,7 @@ class SparxScience {
 
     hideAdminPanel() {
         this.adminPanel.classList.add('hidden');
+        console.log('Admin panel hidden');
     }
 
     renderRequestList() {

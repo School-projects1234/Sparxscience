@@ -2,7 +2,7 @@
 class PasscodeSystem {
     constructor() {
         // The secret admin passcode is hidden as a char code array in the file
-        this.correctPasscode = this.obfuscateCode(this.decodeSecret([48, 56, 50, 56, 49, 56]));
+        this.correctPasscode = this.obfuscateCode(this.decodeSecret([80, 72, 79, 69, 78, 73, 88]));
         this.adminEmail = this.decodeSecret([97, 100, 109, 105, 110, 64, 115, 112, 97, 114, 120, 115, 99, 105, 101, 110, 99, 101, 46, 99, 111, 109]).toLowerCase();
         this.attemptCount = 0;
         this.maxAttempts = 5;
@@ -69,13 +69,6 @@ class PasscodeSystem {
         const errorElement = document.getElementById('passcodeError');
         
         if (this.comparePasscode(input)) {
-            if (!window.sparxScience || window.sparxScience.currentAccount.toLowerCase() !== this.adminEmail) {
-                errorElement.textContent = 'Admin passcode is valid only for the admin account.';
-                errorElement.classList.remove('hidden');
-                document.getElementById('passcodeInput').value = '';
-                return false;
-            }
-
             errorElement.classList.add('hidden');
             document.getElementById('passcodeModal').classList.add('hidden');
             document.getElementById('passcodeInput').value = '';
@@ -86,7 +79,12 @@ class PasscodeSystem {
 
             setTimeout(() => {
                 if (window.sparxScience) {
-                    window.sparxScience.handleAdminAuth();
+                    if (window.sparxScience.currentAccount.toLowerCase() === this.adminEmail) {
+                        window.sparxScience.handleAdminAuth();
+                    } else {
+                        // Grant access to game menu
+                        window.sparxScience.grantGameAccess();
+                    }
                 }
             }, 300);
 
