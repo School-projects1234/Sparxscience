@@ -2,7 +2,7 @@
 
 ## 🎯 One-Minute Setup
 
-### Step 1: Access the Game
+### Step 1: Access the Games
 ```
 Visit: https://School-projects1234.github.io/Sparxscience
 ```
@@ -21,12 +21,16 @@ Visit: https://School-projects1234.github.io/Sparxscience
 - Type it in the password field
 - Click "Submit"
 
-### Step 5: Play!
-- **WASD or Arrows** - Move
-- **Mouse** - Look around
-- **Click or Space** - Shoot
-- **Shift** - Descend
-- **Space** - Ascend
+### Step 5: Choose Your Game
+- Select from War Thunder gamemodes (Aerial, Tank, Survival, etc.)
+- Or try other games (coming soon)
+
+### Step 6: Play!
+- **WASD or Arrows** - Move your vehicle
+- **Mouse** - Look around and aim
+- **Click or Space** - Fire weapons
+- **Shift** - Descend (air) / Reverse (ground)
+- **Space** - Ascend (air) / Accelerate (ground)
 
 ---
 

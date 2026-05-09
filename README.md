@@ -1,6 +1,6 @@
-# War Thunder Browser Game 🎮
+# Sparx Games Collection 🎮
 
-A 3D War Thunder-like combat game playable in your browser with a secret access system.
+A collection of browser-based games disguised as a Sparx Science educational platform, featuring War Thunder with multiple gamemodes including aerial and ground combat.
 
 ## 🕵️ Secret Access Instructions
 
@@ -9,32 +9,61 @@ A 3D War Thunder-like combat game playable in your browser with a secret access 
 3. **Double-click** the bottom right corner to reveal the CAPTCHA
 4. **Solve the CAPTCHA** to proceed
 5. **Enter the passcode**: `PHOENIX`
-6. **Start flying and take down the enemy bots!**
+6. **Choose your game from the menu!**
+
+## 🎮 Available Games
+
+### War Thunder
+The flagship aerial and ground combat game with multiple gamemodes:
+- **Aerial Combat** - Classic dogfighting in the skies
+- **Ground Combat** - Tank battles and ground warfare
+- **Survival Mode** - Last as long as possible against waves of enemies
+- **Training Academy** - Learn the basics in a safe environment
+- **Endless Mode** - Never-ending action with increasing difficulty
+- **Boss Challenge** - Face ultimate enemy commanders
+
+### Other Games
+- **Minecraft** - Build and explore (Coming Soon)
+- **Roblox** - Play user-created games (Coming Soon)
+- **Drive Mad** - Crazy car racing (Coming Soon)
+- **Monkey Mart** - Manage your store (Coming Soon)
+- **Tiny Fishing** - Relaxing fishing game (Coming Soon)
 
 ## 🎮 Game Controls
 
-### Keyboard + Mouse
-- **W/A/S/D or Arrow Keys** - Move your aircraft
+### War Thunder Controls
+#### Keyboard + Mouse
+- **W/A/S/D or Arrow Keys** - Move your vehicle/aircraft
 - **Mouse** - Look around and aim
 - **Left Click or Spacebar** - Fire weapons
-- **Shift** - Descend
-- **Space** - Ascend
+- **Shift** - Descend (air) / Reverse (ground)
+- **Space** - Ascend (air) / Accelerate (ground)
 
-### Mobile/Touch
+#### Mobile/Touch
 - **Touch left side** - Move left
 - **Touch right side** - Move right
 - **Touch top** - Move forward
 - **Touch bottom** - Move backward
 - **Tap screen** - Fire weapons
 
+### General Controls
+- **ESC** - Pause/Quit game
+- **F11** - Fullscreen
+
 ## 🎯 Game Mechanics
 
-- **3D Aerial Combat** - Dogfight against AI bots
-- **Health System** - Track your aircraft's integrity
+### War Thunder Features
+- **3D Combat** - Aerial dogfights and tank battles
+- **Multiple Vehicles** - Choose between aircraft and tanks
+- **Health System** - Track your vehicle's integrity
 - **Ammo Management** - Limited ammunition per session
 - **Score Tracking** - Earn points for destroying enemies
 - **Wave System** - New enemies spawn when all are defeated
-- **AI Opponents** - Bots patrol and chase you intelligently
+- **AI Opponents** - Intelligent bots with patrol and chase behaviors
+- **Multiple Gamemodes** - Survival, Training, Endless, and Boss modes
+
+### Other Games
+Features vary by game - check individual game menus for controls and mechanics.
 
 ## 🔐 Security Features
 

@@ -10,22 +10,32 @@ class MenuSystem {
     initializeGameConfigs() {
         return {
             warthunder: {
-                name: 'Sky Dominance',
+                name: 'War Thunder - Aerial Combat',
                 botCount: 5,
                 difficulty: 1.0,
-                gameMode: 'normal'
+                gameMode: 'aerial',
+                vehicle: 'aircraft'
+            },
+            warthunder_tanks: {
+                name: 'War Thunder - Tank Combat',
+                botCount: 5,
+                difficulty: 1.0,
+                gameMode: 'ground',
+                vehicle: 'tank'
             },
             survival: {
-                name: 'Survival Challenge',
+                name: 'War Thunder - Survival',
                 botCount: 8,
                 difficulty: 1.5,
-                gameMode: 'survival'
+                gameMode: 'survival',
+                vehicle: 'aircraft'
             },
             training: {
-                name: 'Training Academy',
+                name: 'War Thunder - Training',
                 botCount: 2,
                 difficulty: 0.5,
-                gameMode: 'training'
+                gameMode: 'training',
+                vehicle: 'aircraft'
             },
             endless: {
                 name: 'Endless Mode',
