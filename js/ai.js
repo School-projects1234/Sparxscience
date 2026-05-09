@@ -1,9 +1,170 @@
-// AI ChatBot System (ChatGPT-like)
+// AI ChatBot System with Machine Learning - Advanced NLP with Cloud Sync
 class AIAssistant {
     constructor() {
         this.conversationHistory = [];
+        this.learnedPatterns = new Map();
+        this.contextMemory = [];
+        this.userPreferences = {};
+        this.responseCache = new Map();
+        
+        // Cloud sync settings
+        this.userId = this.generateUserId();
+        this.serverUrl = this.detectServerUrl();
+        this.syncInterval = 30 * 1000; // Sync every 30 seconds
+        this.isOnline = navigator.onLine;
+        
         this.setupEventListeners();
         this.responses = this.initializeResponses();
+        this.loadLocalData();
+        this.initializeCloudSync();
+    }
+
+    generateUserId() {
+        // Generate or retrieve unique user ID
+        let userId = localStorage.getItem('aiUserId');
+        if (!userId) {
+            userId = 'user_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+            localStorage.setItem('aiUserId', userId);
+        }
+        return userId;
+    }
+
+    detectServerUrl() {
+        // Auto-detect server URL (works locally and in production)
+        const protocol = window.location.protocol;
+        const hostname = window.location.hostname;
+        const port = window.location.port;
+        
+        // If running on localhost with custom port, use it
+        if (hostname === 'localhost' || hostname === '127.0.0.1') {
+            return port ? `${protocol}//${hostname}:${port}` : `${protocol}//${hostname}:3000`;
+        }
+        
+        // Otherwise use current domain
+        return `${protocol}//${hostname}${port ? ':' + port : ''}`;
+    }
+
+    initializeCloudSync() {
+        // Check online status
+        window.addEventListener('online', () => {
+            this.isOnline = true;
+            console.log('🌐 Back online - syncing AI data with cloud...');
+            this.syncWithServer();
+        });
+        
+        window.addEventListener('offline', () => {
+            this.isOnline = false;
+            console.log('📴 Offline - AI will continue learning locally');
+        });
+
+        // Load global patterns from server on startup
+        this.loadGlobalPatterns();
+
+        // Periodic sync with server
+        setInterval(() => {
+            if (this.isOnline) {
+                this.syncWithServer();
+            }
+        }, this.syncInterval);
+    }
+
+    async loadGlobalPatterns() {
+        // Fetch and load globally learned patterns from server
+        if (!this.isOnline) return;
+
+        try {
+            const response = await fetch(`${this.serverUrl}/api/ai/learning`);
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Merge global patterns into local learning
+                if (data.patterns && Array.isArray(data.patterns)) {
+                    data.patterns.forEach(([key, value]) => {
+                        if (!this.learnedPatterns.has(key)) {
+                            this.learnedPatterns.set(key, value);
+                        }
+                    });
+                }
+                
+                console.log(`📥 Loaded ${data.patterns.length} patterns from global AI database`);
+            }
+        } catch (error) {
+            console.warn('Could not fetch global patterns:', error.message);
+        }
+    }
+
+    async syncWithServer() {
+        // Sync current learning data with server
+        if (!this.isOnline) return;
+
+        try {
+            const syncData = {
+                userId: this.userId,
+                patterns: Array.from(this.learnedPatterns.entries()),
+                preferences: this.userPreferences,
+                conversations: this.conversationHistory.slice(-50) // Last 50 conversations
+            };
+
+            const response = await fetch(`${this.serverUrl}/api/ai/sync`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(syncData)
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(`☁️ Synced with server: ${result.synced.conversations} conversations, ${result.synced.patterns} patterns`);
+                
+                // Load any new patterns from server after sync
+                if (result.globalStats) {
+                    this.userPreferences.globalStats = result.globalStats;
+                }
+            }
+        } catch (error) {
+            console.warn('Cloud sync failed (offline or server unavailable):', error.message);
+        }
+    }
+
+    async getGlobalStats() {
+        // Retrieve global AI statistics from server
+        if (!this.isOnline) {
+            return { error: 'Offline - cannot fetch global stats' };
+        }
+
+        try {
+            const response = await fetch(`${this.serverUrl}/api/ai/stats`);
+            if (response.ok) {
+                return await response.json();
+            }
+        } catch (error) {
+            console.warn('Could not fetch global stats:', error.message);
+        }
+        return null;
+    }
+
+    loadLocalData() {
+        // Load previously learned patterns from localStorage
+        const saved = localStorage.getItem('aiLearningData');
+        if (saved) {
+            try {
+                const data = JSON.parse(saved);
+                this.learnedPatterns = new Map(data.patterns || []);
+                this.userPreferences = data.preferences || {};
+            } catch (e) {
+                console.log('Learning data backup not found, starting fresh');
+            }
+        }
+    }
+
+    saveLearnedData() {
+        // Persist learning data locally
+        const data = {
+            patterns: Array.from(this.learnedPatterns.entries()),
+            preferences: this.userPreferences
+        };
+        localStorage.setItem('aiLearningData', JSON.stringify(data));
     }
 
     initializeResponses() {
@@ -105,6 +266,13 @@ class AIAssistant {
                 this.sendMessage();
             }
         });
+        
+        // Initialize with welcome message on first load
+        setTimeout(() => {
+            if (document.getElementById('chatMessages').children.length === 0) {
+                this.clearHistory();
+            }
+        }, 100);
     }
 
     sendMessage() {
@@ -117,51 +285,370 @@ class AIAssistant {
         this.addMessageToChat(message, 'user');
         input.value = '';
 
-        // Get AI response
+        // Get AI response using ML-enhanced generation
         const response = this.generateResponse(message);
         
-        // Simulate typing delay
+        // Simulate realistic thinking delay (longer for harder queries)
+        const tokens = this.tokenize(message);
+        const thinkingTime = 400 + (tokens.length * 50) + Math.random() * 300;
+        
         setTimeout(() => {
             this.addMessageToChat(response, 'ai');
-        }, 500 + Math.random() * 500);
+            
+            // Show thinking indicator
+            this.updateContextFromConversation(message, response);
+        }, thinkingTime);
 
-        // Store in history
+        // Store in history with metadata
         this.conversationHistory.push({
             user: message,
             ai: response,
-            timestamp: Date.now()
+            timestamp: Date.now(),
+            tokens: tokens,
+            intent: this.recognizeIntent(message, this.tokenize(message))
+        });
+        
+        this.contextMemory.push({
+            query: message,
+            response: response,
+            time: Date.now()
         });
     }
 
-    generateResponse(userInput) {
-        const input = userInput.toLowerCase();
+    updateContextFromConversation(userInput, aiResponse) {
+        // Learn user preferences from conversation
+        if (userInput.includes('boss')) {
+            this.userPreferences.lastGameMode = 'Boss Challenge';
+        } else if (userInput.includes('training') || userInput.includes('learn')) {
+            this.userPreferences.lastGameMode = 'Training Academy';
+        } else if (userInput.includes('mobile') || userInput.includes('phone')) {
+            this.userPreferences.platform = 'mobile';
+        }
+        
+        // Detect skill level from questions
+        if (userInput.includes('how do i') || userInput.includes('how to') || userInput.includes('beginner')) {
+            this.userPreferences.skillLevel = 'beginner';
+        } else if (userInput.includes('advanced') || userInput.includes('pro') || userInput.includes('expert')) {
+            this.userPreferences.skillLevel = 'advanced';
+        }
+    }
 
-        // Check for matching patterns
-        for (const [pattern, responses] of Object.entries(this.responses)) {
-            const patterns = pattern.split('|');
-            if (patterns.some(p => input.includes(p))) {
-                return this.selectRandomResponse(responses);
+    generateResponse(userInput) {
+        const input = userInput.toLowerCase().trim();
+        
+        // Check cache first for performance
+        if (this.responseCache.has(input)) {
+            return this.responseCache.get(input);
+        }
+
+        // Tokenize and analyze input
+        const tokens = this.tokenize(input);
+        const intent = this.recognizeIntent(input, tokens);
+        const context = this.extractContext(input);
+        
+        // Score all available responses for best match
+        const bestMatch = this.findBestResponse(input, tokens, intent);
+        
+        let response = '';
+        
+        if (bestMatch.score > 0.5) {
+            // High confidence match
+            response = this.formatResponse(bestMatch.text, context, intent);
+            this.learnFromInteraction(input, response, bestMatch.score);
+        } else if (this.learnedPatterns.has(intent)) {
+            // Use learned pattern
+            response = this.learnedPatterns.get(intent);
+            this.updateLearnedPattern(intent, response);
+        } else {
+            // Generate contextual default response
+            response = this.generateContextualResponse(input, context, intent, tokens);
+            this.recordNewPattern(input, response, intent);
+        }
+
+        // Cache and return
+        this.responseCache.set(input, response);
+        return response;
+    }
+
+    tokenize(text) {
+        // Break text into meaningful tokens
+        return text
+            .toLowerCase()
+            .split(/[\s,\?!\.;:]+/)
+            .filter(token => token.length > 1)
+            .map(token => token.trim());
+    }
+
+    recognizeIntent(input, tokens) {
+        // Analyze input to determine user intent
+        const intentPatterns = {
+            'help': ['help', 'assist', 'support', 'question', 'how', 'what', 'explain'],
+            'strategy': ['strategy', 'tips', 'advice', 'trick', 'improve', 'better', 'success', 'win'],
+            'controls': ['control', 'button', 'key', 'wasd', 'arrow', 'mouse', 'touch', 'gameplay'],
+            'difficulty': ['hard', 'easy', 'difficult', 'challenge', 'mode', 'challenging'],
+            'technical': ['bug', 'error', 'problem', 'crash', 'not working', 'broken', 'issue'],
+            'mobile': ['mobile', 'phone', 'tablet', 'touch', 'responsive'],
+            'ai_bot': ['ai', 'bot', 'enemy', 'artificial', 'intelligent', 'opponent'],
+            'gameplay': ['play', 'game', 'score', 'points', 'achivement', 'reward', 'level'],
+            'general': ['hi', 'hello', 'hey', 'greetings', 'cool', 'awesome', 'thanks']
+        };
+
+        let bestIntent = 'help';
+        let bestScore = 0;
+
+        for (const [intent, keywords] of Object.entries(intentPatterns)) {
+            const score = tokens.filter(token => keywords.includes(token)).length / tokens.length;
+            if (score > bestScore) {
+                bestScore = score;
+                bestIntent = intent;
             }
         }
 
-        // Default responses if no match
-        const defaultResponses = [
-            'That\'s a great question! I\'m still learning, but the game has lots of features to explore!',
-            'I\'m not sure about that, but try checking the game controls or tutorials!',
-            'Interesting! Want to know about game strategies, controls, or how to improve?',
-            'Great question! For more info, try the game yourself and see what works best.',
-            'Hmm, that\'s a tricky one! Why don\'t you try it in the game and see what happens? 😄'
-        ];
+        return bestIntent;
+    }
 
-        return this.selectRandomResponse(defaultResponses);
+    extractContext(input) {
+        // Extract contextual information like game mode, difficulty, etc.
+        const context = {
+            mentionsBoss: input.includes('boss'),
+            mentionsDifficulty: input.includes('hard') || input.includes('easy') || input.includes('difficulty'),
+            mentionsMobile: input.includes('mobile') || input.includes('phone') || input.includes('tablet'),
+            mentionsStrategy: input.includes('strategy') || input.includes('tips') || input.includes('how'),
+            recentMode: this.userPreferences.lastGameMode || 'general',
+            skillLevel: this.userPreferences.skillLevel || 'intermediate'
+        };
+        return context;
+    }
+
+    findBestResponse(input, tokens, intent) {
+        let bestMatch = { text: '', score: 0 };
+        
+        // Check all response categories
+        for (const [pattern, responses] of Object.entries(this.responses)) {
+            const patterns = pattern.split('|');
+            
+            for (const p of patterns) {
+                const score = this.calculateSimilarity(input, p, tokens);
+                
+                if (score > bestMatch.score) {
+                    const selectedResponse = this.selectBestResponseFromSet(
+                        responses, 
+                        input, 
+                        this.userPreferences.recentResponses || []
+                    );
+                    bestMatch = { 
+                        text: selectedResponse, 
+                        score: score,
+                        pattern: p
+                    };
+                }
+            }
+        }
+        
+        return bestMatch;
+    }
+
+    calculateSimilarity(text1, text2, tokens) {
+        // TF-IDF-like similarity scoring
+        const text1Lower = text1.toLowerCase();
+        const text2Lower = text2.toLowerCase();
+        
+        // Exact match bonus
+        if (text1Lower === text2Lower) return 1.0;
+        if (text1Lower.includes(text2Lower) || text2Lower.includes(text1Lower)) return 0.8;
+        
+        // Token overlap scoring
+        const text2Tokens = text2Lower.split('|');
+        const matches = tokens.filter(token => 
+            text2Tokens.some(p => p.includes(token) || token.includes(p))
+        ).length;
+        
+        return Math.min(matches / Math.max(tokens.length, 1), 1.0) * 0.6;
+    }
+
+    selectBestResponseFromSet(responses, input, recent) {
+        // Avoid repeating recently used responses
+        const recentSet = new Set(recent.slice(-3));
+        
+        // Find unused response, or pick random if all used
+        const unused = responses.filter(r => !recentSet.has(r));
+        const selected = unused.length > 0 ? 
+            unused[Math.floor(Math.random() * unused.length)] :
+            responses[Math.floor(Math.random() * responses.length)];
+        
+        // Track response usage
+        if (!this.userPreferences.recentResponses) {
+            this.userPreferences.recentResponses = [];
+        }
+        this.userPreferences.recentResponses.push(selected);
+        if (this.userPreferences.recentResponses.length > 10) {
+            this.userPreferences.recentResponses.shift();
+        }
+        
+        return selected;
+    }
+
+    formatResponse(response, context, intent) {
+        // Personalize response based on user context
+        let formatted = response;
+        
+        if (context.skillLevel === 'beginner') {
+            formatted = formatted.replace(/Try/g, 'Start with');
+        } else if (context.skillLevel === 'advanced') {
+            formatted = this.addAdvancedTips(formatted);
+        }
+        
+        if (context.mentionsMobile && !formatted.includes('mobile')) {
+            formatted += ' (Works great on mobile too!)';
+        }
+        
+        return this.selectRandomResponse([formatted]);
+    }
+
+    addAdvancedTips(response) {
+        // Add expert-level tips
+        const advancedTips = {
+            'strategy': ' Pro tip: Advanced players master circle strafing and altitude management!',
+            'controls': ' Expert move: Rebind keys to your preference for faster reflexes!',
+            'difficulty': ' Challenge: Try the Boss Challenge mode for the ultimate AI test!'
+        };
+        
+        for (const [key, tip] of Object.entries(advancedTips)) {
+            if (response.toLowerCase().includes(key)) {
+                return response + tip;
+            }
+        }
+        return response;
+    }
+
+    generateContextualResponse(input, context, intent, tokens) {
+        // Generate dynamic responses based on context
+        const contextResponses = {
+            'help': `I can help! Based on your skill level (${context.skillLevel}), here are some resources. ${
+                context.mentionsStrategy ? 'For strategy, focus on movement patterns and positioning.' : 
+                context.mentionsMobile ? 'Mobile controls: left side moves, right side aims.' :
+                'Try asking about controls, strategies, game modes, or technical issues!'
+            }`,
+            
+            'strategy': `Great question! ${
+                context.skillLevel === 'beginner' ? 'Start by mastering basic movement - avoid staying still!' :
+                'Advanced tactics include altitude manipulation and predictive aiming.'
+            } ${
+                context.mentionsBoss ? 'Boss fights require patience and perfect timing.' : ''
+            }`,
+            
+            'controls': `Movement controls vary by device. ${
+                context.mentionsMobile ? 'Mobile: tap left side to move, right to aim' :
+                'Desktop: WASD or arrows to move, mouse to aim and shoot'
+            }. Want specific controls?`,
+            
+            'difficulty': `Challenge depends on your skill. ${
+                context.skillLevel === 'beginner' ? 'Try Training Academy mode first.' :
+                'Try Boss Challenge if you want the ultimate test!'
+            }`,
+            
+            'technical': 'Technical issues? Try refreshing, checking WebGL support, or testing in Chrome/Firefox. Still stuck?',
+            
+            'mobile': 'Mobile gaming! The touchscreen controls work great. Try a larger device for better experience.',
+            
+            'ai_bot': 'Our AI uses sophisticated pathfinding and decision trees. Higher difficulty means more aggressive AI behavior!',
+            
+            'gameplay': `Scoring depends on mode. Generally: 100 points per bot, bonuses for speed. ${
+                context.recentMode ? `You were playing ${context.recentMode} - good choice!` : ''
+            }`,
+            
+            'general': 'Hey! I\'m here to help with anything about the games. What would you like to know?'
+        };
+
+        return contextResponses[intent] || contextResponses['help'];
+    }
+
+    learnFromInteraction(userInput, response, confidence) {
+        // Learn from positive interactions
+        if (confidence > 0.7) {
+            const tokens = this.tokenize(userInput);
+            const intent = this.recognizeIntent(userInput, tokens);
+            
+            // Update learning data
+            const key = tokens.slice(0, 3).join(' ');
+            this.learnedPatterns.set(intent, response);
+            
+            // Track user preferences
+            if (!this.userPreferences.topicFrequency) {
+                this.userPreferences.topicFrequency = {};
+            }
+            this.userPreferences.topicFrequency[intent] = 
+                (this.userPreferences.topicFrequency[intent] || 0) + 1;
+        }
+        
+        this.saveLearnedData();
+        
+        // Async server sync (don't wait for it)
+        if (this.isOnline) {
+            this.recordPatternOnServer(userInput, response);
+        }
+    }
+
+    recordNewPattern(input, response, intent) {
+        // Record new successful patterns for future use
+        const tokens = this.tokenize(input);
+        if (tokens.length > 0) {
+            const pattern = tokens.slice(0, 2).join(' ');
+            if (!this.learnedPatterns.has(pattern)) {
+                this.learnedPatterns.set(pattern, response);
+                this.saveLearnedData();
+                
+                // Try to record on server
+                if (this.isOnline) {
+                    this.recordPatternOnServer(pattern, response);
+                }
+            }
+        }
+    }
+
+    async recordPatternOnServer(key, value) {
+        // Record a new pattern on the server (collective learning)
+        if (!this.isOnline) return;
+
+        try {
+            const response = await fetch(`${this.serverUrl}/api/ai/pattern`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    key,
+                    value,
+                    userId: this.userId
+                })
+            });
+
+            if (response.ok) {
+                const result = await response.json();
+                console.log(`📤 Pattern recorded globally (${result.totalPatterns} patterns now)`);
+            }
+        } catch (error) {
+            console.warn('Could not record pattern on server:', error.message);
+        }
+    }
+
+    updateLearnedPattern(pattern, response) {
+        // Reinforce successful patterns
+        const current = this.learnedPatterns.get(pattern);
+        if (current !== response) {
+            this.learnedPatterns.set(pattern, response);
+            this.saveLearnedData();
+        }
     }
 
     selectRandomResponse(responses) {
-        const response = responses[Math.floor(Math.random() * responses.length)];
-        // Convert markdown-like formatting
-        return response
-            .replace(/\*\*(.*?)\*\*/g, '$1')  // Bold text
-            .replace(/__(.*?)__/g, '$1');      // Underscores
+        if (Array.isArray(responses) && responses.length > 0) {
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            return response
+                .replace(/\*\*(.*?)\*\*/g, '$1')  // Bold text
+                .replace(/__(.*?)__/g, '$1');      // Underscores  
+        }
+        return responses || 'That\'s interesting! Tell me more!';
     }
 
     addMessageToChat(message, sender) {
@@ -189,15 +676,86 @@ class AIAssistant {
 
     clearHistory() {
         this.conversationHistory = [];
+        this.contextMemory = [];
         document.getElementById('chatMessages').innerHTML = '';
+        
+        // Show cloud sync status
+        this.addCloudStatusMessage();
+        
+        // Show welcome message
         this.addMessageToChat(
-            'Hello! I\'m your AI assistant. Ask me anything about the games, get help, or just chat! What can I help you with?',
+            'Hello! I\'m your AI assistant powered by cloud-synchronized machine learning. I learn from conversations with everyone and improve over time. Ask me anything about the games, get help, or just chat! What can I help you with?',
             'ai'
         );
     }
+
+    // Sentiment analysis for response quality
+    analyzeSentiment(text) {
+        const positive = ['good', 'great', 'awesome', 'cool', 'love', 'thanks', 'helpful', 'perfect'];
+        const negative = ['bad', 'hate', 'terrible', 'useless', 'broken', 'confusing', 'difficult'];
+        
+        const lower = text.toLowerCase();
+        const posCount = positive.filter(word => lower.includes(word)).length;
+        const negCount = negative.filter(word => lower.includes(word)).length;
+        
+        return {
+            sentiment: posCount > negCount ? 'positive' : negCount > posCount ? 'negative' : 'neutral',
+            score: (posCount - negCount) / Math.max(posCount + negCount, 1)
+        };
+    }
+
+    // Analyze conversation patterns to improve future responses
+    analyzeConversationPatterns() {
+        const patterns = {
+            topTopics: {},
+            commonQuestions: [],
+            userSatisfaction: 0
+        };
+
+        for (const entry of this.conversationHistory) {
+            const intent = entry.intent || 'unknown';
+            patterns.topTopics[intent] = (patterns.topTopics[intent] || 0) + 1;
+            
+            const sentiment = this.analyzeSentiment(entry.user + ' ' + entry.ai);
+            if (sentiment.sentiment === 'positive') {
+                patterns.userSatisfaction += sentiment.score;
+            }
+        }
+
+        return patterns;
+    }
+
+    // Get AI statistics
+    getStatistics() {
+        return {
+            totalMessages: this.conversationHistory.length,
+            topicsDiscussed: Object.keys(this.userPreferences.topicFrequency || {}),
+            userSkillLevel: this.userPreferences.skillLevel || 'unknown',
+            favoriteGameMode: this.userPreferences.lastGameMode || 'unknown',
+            learnedPatterns: this.learnedPatterns.size,
+            conversationDuration: this.conversationHistory.length > 0 ? 
+                Date.now() - this.conversationHistory[0].timestamp : 0,
+            userId: this.userId,
+            isOnline: this.isOnline,
+            syncStatus: this.isOnline ? 'syncing' : 'offline',
+            globalStats: this.userPreferences.globalStats || {}
+        };
+    }
+
+    // Add a method to display cloud sync status to user
+    addCloudStatusMessage() {
+        const chatMessages = document.getElementById('chatMessages');
+        const statusMsg = document.createElement('div');
+        statusMsg.className = 'message system-message';
+        statusMsg.style.fontSize = '0.9em';
+        statusMsg.style.color = '#999';
+        statusMsg.style.textAlign = 'center';
+        statusMsg.innerHTML = `<p>☁️ Cloud synced AI • Learning shared globally • User ID: ${this.userId.split('_')[0]}</p>`;
+        chatMessages.appendChild(statusMsg);
+    }
 }
 
-// Initialize AI Assistant
+// Initialize AI with Machine Learning support
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         if (!window.aiAssistant) {
