@@ -1,0 +1,150 @@
+/* Minecraft Game Styles */
+.minecraft-hud {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #8B7355;
+    border-radius: 5px;
+    padding: 15px;
+    color: #fff;
+    font-family: Arial, sans-serif;
+    z-index: 10;
+}
+
+.minecraft-inventory {
+    margin-bottom: 15px;
+}
+
+.minecraft-inventory h3 {
+    margin: 0 0 10px 0;
+    font-size: 1rem;
+    color: #ffff00;
+}
+
+.inventory-slots {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    max-width: 200px;
+}
+
+.inventory-slot {
+    width: 40px;
+    height: 40px;
+    background: #202020;
+    border: 2px solid #696969;
+    border-radius: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.2rem;
+    transition: all 0.2s ease;
+}
+
+.inventory-slot:hover,
+.inventory-slot.selected {
+    border-color: #ffff00;
+    background: #404040;
+    box-shadow: 0 0 8px rgba(255, 255, 0, 0.3);
+}
+
+.inventory-slot span:last-child {
+    font-size: 0.7rem;
+    color: #ff6666;
+}
+
+.minecraft-controls {
+    font-size: 0.9rem;
+    color: #aaa;
+}
+
+.minecraft-controls p {
+    margin: 0 0 10px 0;
+    line-height: 1.4;
+}
+
+/* Racing Game Styles */
+.racing-hud {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    border: 3px solid #ff6600;
+    border-radius: 8px;
+    padding: 20px 30px;
+    color: #fff;
+    font-family: 'Arial Black', Arial, sans-serif;
+    z-index: 10;
+    min-width: 300px;
+}
+
+.hud-info {
+    display: flex;
+    gap: 40px;
+    margin-bottom: 15px;
+}
+
+.race-info,
+.race-stats {
+    flex: 1;
+}
+
+.race-info h2 {
+    margin: 0 0 10px 0;
+    font-size: 1.4rem;
+    color: #ff6600;
+    text-shadow: 0 0 10px rgba(255, 102, 0, 0.5);
+}
+
+.race-info p,
+.race-stats p {
+    margin: 5px 0;
+    font-size: 0.95rem;
+    color: #ffff00;
+}
+
+.race-info span,
+.race-stats span {
+    color: #00ff00;
+    font-weight: bold;
+}
+
+.race-controls {
+    text-align: center;
+    border-top: 2px solid #ff6600;
+    padding-top: 10px;
+    font-size: 0.85rem;
+    color: #aaa;
+    margin-bottom: 10px;
+}
+
+.race-controls button {
+    margin-top: 10px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .racing-hud {
+        min-width: auto;
+        width: 90%;
+    }
+
+    .hud-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .minecraft-hud {
+        bottom: 10px;
+        left: 10px;
+        padding: 10px;
+    }
+
+    .inventory-slots {
+        max-width: 150px;
+    }
+}

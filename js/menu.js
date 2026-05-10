@@ -11,70 +11,17 @@ class MenuSystem {
 
     initializeGameConfigs() {
         return {
-            warthunder: {
-                name: 'War Thunder - Aerial Combat',
+            warthunder_unified: {
+                name: 'War Thunder',
                 category: 'War Thunder',
-                description: 'Fast-paced air combat with enemy fighters and targets.',
-                controls: 'WASD: Move | Mouse: Aim | Space: Shoot | Shift: Boost',
-                icon: '✈️',
-                botCount: 5,
-                difficulty: 1.0,
-                gameMode: 'warthunder',
-                vehicle: 'aircraft'
-            },
-            warthunder_tanks: {
-                name: 'War Thunder - Tank Combat',
-                category: 'War Thunder',
-                description: 'Heavy armor engagements with tanks and long-range shots.',
-                controls: 'WASD: Move | Mouse: Aim turret | Space: Fire | Shift: Accelerate',
-                icon: '🚚',
-                botCount: 5,
-                difficulty: 1.1,
-                gameMode: 'warthunder_tanks',
-                vehicle: 'tank'
-            },
-            survival: {
-                name: 'War Thunder - Survival',
-                category: 'War Thunder',
-                description: 'Survive endless waves of enemy aircraft in this tense mode.',
-                controls: 'WASD: Move | Mouse: Aim | Space: Shoot | Shift: Boost | R: Reload',
-                icon: '🛡️',
-                botCount: 8,
+                description: 'Select your nation and engage in air, ground, or naval combat. Choose between fighter, bomber, tank, or ship roles.',
+                controls: 'WASD: Move | Mouse: Aim | Space: Shoot/Fire | Click: Attack | Shift: Boost',
+                icon: '🎖️',
+                botCount: 4,
                 difficulty: 1.5,
-                gameMode: 'survival',
-                vehicle: 'aircraft'
-            },
-            training: {
-                name: 'War Thunder - Training',
-                category: 'War Thunder',
-                description: 'Practice the controls and sharpen your aim in training.',
-                controls: 'WASD: Move | Mouse: Aim | Space: Shoot | Shift: Boost | R: Reload',
-                icon: '🎯',
-                botCount: 2,
-                difficulty: 0.5,
-                gameMode: 'training',
-                vehicle: 'aircraft'
-            },
-            endless: {
-                name: 'Endless Mode',
-                category: 'War Thunder',
-                description: 'Keep fighting until you run out of ammo or health.',
-                controls: 'WASD: Move | Mouse: Aim | Space: Shoot | Shift: Boost | R: Reload',
-                icon: '♾️',
-                botCount: 5,
-                difficulty: 1.0,
-                gameMode: 'endless',
-                waveMultiplier: 1.2
-            },
-            challenge: {
-                name: 'Boss Challenge',
-                category: 'War Thunder',
-                description: 'Face elite commanders in a high-stakes showdown.',
-                controls: 'WASD: Move | Mouse: Aim | Space: Shoot | Shift: Boost | R: Reload',
-                icon: '👑',
-                botCount: 3,
-                difficulty: 2.0,
-                gameMode: 'challenge'
+                gameMode: 'warthunder_unified',
+                vehicle: 'multi',
+                isWarThunder: true
             },
             minecraft: {
                 name: 'Minecraft',
@@ -454,6 +401,29 @@ class MenuSystem {
         this.currentGame = gameId;
         this.addToRecentlyPlayed(gameId);
 
+        // Check if this is the new unified War Thunder game
+        if (config.isWarThunder) {
+            this.launchWarThunder();
+            return;
+        }
+
+        // Check for individual game engines
+        if (gameId === 'minecraft') {
+            this.launchMinecraft();
+            return;
+        }
+        
+        if (gameId === 'drivemad') {
+            this.launchRacingGame('arcade');
+            return;
+        }
+        
+        if (gameId === 'rallyraid') {
+            this.launchRacingGame('rally');
+            return;
+        }
+
+        // Default to legacy game engine for other games
         window.gameInstance.selectedGame = gameId;
         window.gameInstance.gameMode = config.gameMode;
         window.gameInstance.vehicleType = config.vehicle || config.type || 'aircraft';
@@ -465,6 +435,36 @@ class MenuSystem {
         document.getElementById('mainMenu').classList.add('hidden');
         document.getElementById('gameContainer').classList.remove('hidden');
         window.gameInstance.startGame();
+    }
+
+    launchWarThunder() {
+        // Hide menu and show game container
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('sparxPage').classList.add('hidden');
+        document.getElementById('gameContainer').classList.remove('hidden');
+        
+        // Initialize the War Thunder engine
+        window.warThunderGame = new WarThunderEngine();
+    }
+    
+    launchMinecraft() {
+        // Hide menu and show game container
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('sparxPage').classList.add('hidden');
+        document.getElementById('gameContainer').classList.remove('hidden');
+        
+        // Initialize Minecraft engine
+        window.minecraftGame = new MinecraftGameEngine();
+    }
+    
+    launchRacingGame(mode) {
+        // Hide menu and show game container
+        document.getElementById('mainMenu').classList.add('hidden');
+        document.getElementById('sparxPage').classList.add('hidden');
+        document.getElementById('gameContainer').classList.remove('hidden');
+        
+        // Initialize Racing engine
+        window.racingGame = new RacingGameEngine(mode);
     }
 
     isGameReady(gameId) {
