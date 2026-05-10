@@ -106,9 +106,6 @@ class SparxScience {
 
         if (this.currentAccount) {
             this.accountInput.value = this.currentAccount;
-        } else {
-            // Pre-fill with example email as guide
-            this.accountInput.value = 'youremail@youremailadress';
         }
 
         // Check if already logged in without showing overlay
