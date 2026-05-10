@@ -51,7 +51,7 @@ class GameEngine {
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.renderer.shadowMap.enabled = true;
         this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-        this.renderer.outputEncoding = THREE.sRGBEncoding;
+        this.renderer.outputEncoding = THREE.LinearEncoding;
 
         document.getElementById('gameContainer').insertBefore(
             this.renderer.domElement,
@@ -216,12 +216,11 @@ class GameEngine {
         const isRacing = this.gameMode === 'drivemad';
         const isFishing = this.gameMode === 'tinyfishing';
 
-        const groundGeometry = new THREE.PlaneGeometry(600, 600);
-        const groundMaterial = new THREE.MeshStandardMaterial({
+        const groundGeometry = new THREE.PlaneGeometry(1200, 1200);
+        const groundMaterial = new THREE.MeshPhongMaterial({
             color: isFishing ? 0x2d4b7a : (isRacing ? 0x2a2a2a : 0x3a5a2d),
-            roughness: 0.9,
-            metalness: 0.0,
-            map: isFishing ? null : this.generateTerrainTexture()
+            map: isFishing ? null : this.generateTerrainTexture(),
+            shininess: 0
         });
         const ground = new THREE.Mesh(groundGeometry, groundMaterial);
         ground.rotation.x = -Math.PI / 2;
@@ -276,19 +275,33 @@ class GameEngine {
         canvas.height = 256;
         const ctx = canvas.getContext('2d');
         
-        ctx.fillStyle = '#3a6b3d';
+        // Create a gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 256, 256);
+        gradient.addColorStop(0, '#4a7c59');
+        gradient.addColorStop(1, '#2d5a3d');
+        ctx.fillStyle = gradient;
         ctx.fillRect(0, 0, 256, 256);
         
         // Add grass-like noise
-        for (let i = 0; i < 1000; i++) {
-            ctx.fillStyle = `rgba(${Math.random() * 50 + 40}, ${Math.random() * 80 + 80}, ${Math.random() * 50 + 40}, ${Math.random() * 0.3})`;
-            ctx.fillRect(Math.random() * 256, Math.random() * 256, 3, 3);
+        for (let i = 0; i < 2000; i++) {
+            const brightness = Math.random() * 40 + 60;
+            ctx.fillStyle = `rgba(${brightness * 0.8}, ${brightness}, ${brightness * 0.6}, ${Math.random() * 0.6 + 0.4})`;
+            ctx.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
+        }
+        
+        // Add some larger patches
+        for (let i = 0; i < 50; i++) {
+            ctx.fillStyle = `rgba(${Math.random() * 30 + 50}, ${Math.random() * 50 + 100}, ${Math.random() * 30 + 40}, 0.3)`;
+            ctx.fillRect(Math.random() * 256, Math.random() * 256, 8, 8);
         }
         
         const texture = new THREE.CanvasTexture(canvas);
         texture.repeat.set(4, 4);
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
+        texture.encoding = THREE.LinearEncoding;
+        texture.flipY = false;
+        texture.needsUpdate = true;
         return texture;
     }
 

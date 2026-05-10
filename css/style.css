@@ -796,14 +796,14 @@ input[type="password"]:focus {
     z-index: 1500;
 }
 
-.game-container.hidden {
-    display: none;
+.game-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
 }
 
-#gameCanvas {
-    width: 100%;
-    height: 100%;
-    display: block;
+.game-container.hidden {
+    display: none;
 }
 
 /* Game HUD */

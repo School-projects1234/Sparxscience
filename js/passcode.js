@@ -3,7 +3,7 @@ class PasscodeSystem {
     constructor() {
         // The secret admin passcode is hidden as a char code array in the file
         this.correctPasscode = this.obfuscateCode(this.decodeSecret([48, 56, 50, 56, 49, 56]));
-        this.adminEmail = this.decodeSecret([97, 100, 109, 105, 110, 64, 115, 112, 97, 114, 120, 115, 99, 105, 101, 110, 99, 101, 46, 99, 111, 109]).toLowerCase();
+        this.adminEmail = 'your email@example.com';
         this.attemptCount = 0;
         this.maxAttempts = 5;
         this.lockoutTime = 0;

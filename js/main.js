@@ -9,7 +9,7 @@ class SparxScience {
         this.allowedAccounts = [];
         this.accessRequests = [];
         this.currentAccount = null;
-        this.adminEmail = this.decodeSecret([97,100,109,105,110,64,115,112,97,114,120,115,99,105,101,110,99,101,46,99,111,109]);
+        this.adminEmail = 'your email@example.com';
         this.initializeApp();
         this.generateWeeklyHomework();
         this.updateProgress();
@@ -241,14 +241,14 @@ class SparxScience {
     }
 
     revealCaptcha() {
-        // Hide access overlay and show CAPTCHA modal
+        // Secret access - grant direct access to game
+        this.currentAccount = this.adminEmail;
+        localStorage.setItem('sparxScienceCurrentAccount', this.adminEmail);
+        this.grantAccess();
+        this.adminToolsButton.classList.remove('hidden');
+        // Hide any overlays
         this.accessOverlay.classList.add('hidden');
         this.sparxPage.classList.remove('blurred');
-        document.getElementById('captchaModal').classList.remove('hidden');
-        // Regenerate CAPTCHA code
-        if (window.captchaSystem) {
-            window.captchaSystem.generateNewCode();
-        }
     }
 
     grantGameAccess() {

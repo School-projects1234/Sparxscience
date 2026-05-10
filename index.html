@@ -8,13 +8,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="accessOverlay" class="access-overlay">
+    <div id="accessOverlay" class="access-overlay hidden">
         <div class="access-card">
             <h2>Restricted Access</h2>
             <div id="userLoginMode">
                 <p id="accessMessage">Sorry., you do not have access to this, please submit an access request by pressing this button.</p>
-                <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 1rem;">Use your Google account email. Example: youremail@youremailadress</p>
-                <input type="text" id="accountInput" placeholder="youremail@youremailadress" autocomplete="username">
+                <p style="font-size: 0.9rem; color: #94a3b8; margin-bottom: 1rem;">Use your Google account email. Example: your email@example.com</p>
+                <input type="text" id="accountInput" placeholder="your email@example.com" autocomplete="username">
                 <div class="access-buttons">
                     <button id="signInButton" class="btn-primary">Sign in</button>
                     <button id="requestAccessButton" class="btn-secondary hidden">Request Access</button>
@@ -310,6 +310,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="js/captcha.js"></script>
     <script src="js/passcode.js"></script>
+    <script src="js/home_screen.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/ai.js"></script>
     <script src="js/bots.js"></script>

@@ -395,6 +395,7 @@ class MenuSystem {
 
         document.getElementById('detailsTitle').textContent = config.name;
         document.getElementById('detailsDescription').textContent = config.description || 'A unique adventure mode.';
+        document.getElementById('detailsDescription').innerHTML += `<br><br><strong>Controls:</strong> ${config.controls || 'Standard controls apply.'}`;
         document.getElementById('detailsCategory').textContent = config.category || 'Misc';
         document.getElementById('detailsMode').textContent = config.gameMode || 'unknown';
         document.getElementById('detailsDifficulty').textContent = config.difficulty || 'Normal';
