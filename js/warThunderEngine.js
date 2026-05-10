@@ -32,10 +32,29 @@ class WarThunderEngine {
         this.controlPoints = [];
         this.gameTimer = 0;
         
-        // Vehicles and bots
+        // Terrain and effects
+        this.terrainTiles = [];
+        this.tileSize = 600;
+        this.terrainRadius = 2;
+        this.smokeEffects = [];
+        this.smokeCooldown = 0;
+        
+        // Vehicle and upgrade systems
         this.playerVehicle = null;
         this.bots = [];
         this.botCount = 4;
+        this.selectedShellType = 'AP';
+        this.availableShells = ['AP', 'HE', 'Smoke'];
+        this.upgrades = {
+            engine: 1,
+            armor: 1,
+            turret: 1
+        };
+        this.shellInventory = {
+            AP: { name: 'Armor Piercing', damage: 30, unlockLevel: 1, description: 'High penetration for armored targets.' },
+            HE: { name: 'High Explosive', damage: 40, unlockLevel: 4, description: 'Blast damage for soft targets and structures.' },
+            Smoke: { name: 'Smoke Bomb', damage: 0, unlockLevel: 2, description: 'Deploys a smoke screen to hide your vehicle.' }
+        };
         
         // UI elements
         this.uiElements = {};
@@ -57,17 +76,23 @@ class WarThunderEngine {
                 aircraft: [
                     { name: 'P-51 Mustang', tier: 1, role: 'fighter', speed: 440, firepower: 8, armor: 6 },
                     { name: 'P-47 Thunderbolt', tier: 2, role: 'fighter', speed: 430, firepower: 9, armor: 8 },
-                    { name: 'B-17 Flying Fortress', tier: 3, role: 'bomber', speed: 280, firepower: 6, armor: 9 }
+                    { name: 'B-17 Flying Fortress', tier: 3, role: 'bomber', speed: 280, firepower: 6, armor: 9 },
+                    { name: 'F6F Hellcat', tier: 2, role: 'fighter', speed: 420, firepower: 8, armor: 7 },
+                    { name: 'A-20 Havoc', tier: 3, role: 'attack', speed: 330, firepower: 7, armor: 8 }
                 ],
                 tanks: [
-                    { name: 'M4 Sherman', tier: 1, speed: 42, firepower: 7, armor: 6 },
-                    { name: 'M26 Pershing', tier: 2, speed: 37, firepower: 9, armor: 8 },
-                    { name: 'M48 Patton', tier: 3, speed: 50, firepower: 9, armor: 8 }
+                    { name: 'M24 Chaffee', tier: 1, role: 'light', speed: 55, firepower: 6, armor: 5 },
+                    { name: 'M10 Wolverine', tier: 1, role: 'tank_destroyer', speed: 48, firepower: 8, armor: 5 },
+                    { name: 'M26 Pershing', tier: 2, role: 'heavy', speed: 37, firepower: 9, armor: 8 },
+                    { name: 'M18 Hellcat', tier: 2, role: 'tank_destroyer', speed: 60, firepower: 8, armor: 5 },
+                    { name: 'M48 Patton', tier: 3, role: 'heavy', speed: 50, firepower: 9, armor: 8 },
+                    { name: 'M551 Sheridan', tier: 3, role: 'sniper', speed: 62, firepower: 8, armor: 5 }
                 ],
                 ships: [
-                    { name: 'Fletcher-class Destroyer', tier: 1, speed: 36, firepower: 8, armor: 6 },
-                    { name: 'Baltimore-class Cruiser', tier: 2, speed: 32, firepower: 9, armor: 8 },
-                    { name: 'Iowa-class Battleship', tier: 3, speed: 33, firepower: 10, armor: 9 }
+                    { name: 'Fletcher-class Destroyer', tier: 1, role: 'destroyer', speed: 36, firepower: 8, armor: 6 },
+                    { name: 'Baltimore-class Cruiser', tier: 2, role: 'cruiser', speed: 32, firepower: 9, armor: 8 },
+                    { name: 'Iowa-class Battleship', tier: 3, role: 'battleship', speed: 33, firepower: 10, armor: 9 },
+                    { name: 'Essex-class Carrier', tier: 3, role: 'carrier', speed: 33, firepower: 7, armor: 8 }
                 ]
             },
             germany: {
@@ -77,17 +102,23 @@ class WarThunderEngine {
                 aircraft: [
                     { name: 'Bf 109', tier: 1, role: 'fighter', speed: 450, firepower: 8, armor: 5 },
                     { name: 'Fw 190', tier: 2, role: 'fighter', speed: 440, firepower: 9, armor: 7 },
-                    { name: 'He 111', tier: 3, role: 'bomber', speed: 300, firepower: 5, armor: 8 }
+                    { name: 'He 111', tier: 3, role: 'bomber', speed: 300, firepower: 5, armor: 8 },
+                    { name: 'Ju 87 Stuka', tier: 2, role: 'attack', speed: 330, firepower: 7, armor: 7 },
+                    { name: 'Do 217', tier: 3, role: 'bomber', speed: 320, firepower: 7, armor: 8 }
                 ],
                 tanks: [
-                    { name: 'Panzer IV', tier: 1, speed: 40, firepower: 7, armor: 7 },
-                    { name: 'Panther', tier: 2, speed: 46, firepower: 9, armor: 8 },
-                    { name: 'Tiger II', tier: 3, speed: 38, firepower: 10, armor: 9 }
+                    { name: 'Panzer IV', tier: 1, role: 'medium', speed: 40, firepower: 7, armor: 7 },
+                    { name: 'Panther', tier: 2, role: 'heavy', speed: 46, firepower: 9, armor: 8 },
+                    { name: 'Tiger II', tier: 3, role: 'heavy', speed: 38, firepower: 10, armor: 9 },
+                    { name: 'Jagdpanther', tier: 2, role: 'tank_destroyer', speed: 42, firepower: 10, armor: 7 },
+                    { name: 'Flakpanzer', tier: 2, role: 'aa', speed: 40, firepower: 8, armor: 6 },
+                    { name: 'Sturer Emil', tier: 3, role: 'sniper', speed: 32, firepower: 10, armor: 7 }
                 ],
                 ships: [
-                    { name: 'Z-class Destroyer', tier: 1, speed: 36, firepower: 8, armor: 6 },
-                    { name: 'Admiral Hipper-class Cruiser', tier: 2, speed: 32, firepower: 9, armor: 8 },
-                    { name: 'Bismarck-class Battleship', tier: 3, speed: 30, firepower: 10, armor: 10 }
+                    { name: 'Z-class Destroyer', tier: 1, role: 'destroyer', speed: 36, firepower: 8, armor: 6 },
+                    { name: 'Admiral Hipper-class Cruiser', tier: 2, role: 'cruiser', speed: 32, firepower: 9, armor: 8 },
+                    { name: 'Bismarck-class Battleship', tier: 3, role: 'battleship', speed: 30, firepower: 10, armor: 10 },
+                    { name: 'Graf Zeppelin', tier: 3, role: 'carrier', speed: 32, firepower: 7, armor: 8 }
                 ]
             },
             ussr: {
@@ -97,17 +128,22 @@ class WarThunderEngine {
                 aircraft: [
                     { name: 'Yak-1', tier: 1, role: 'fighter', speed: 400, firepower: 7, armor: 6 },
                     { name: 'La-7', tier: 2, role: 'fighter', speed: 430, firepower: 8, armor: 7 },
-                    { name: 'Ilyushin IL-2', tier: 3, role: 'bomber', speed: 280, firepower: 7, armor: 9 }
+                    { name: 'Ilyushin IL-2', tier: 3, role: 'bomber', speed: 280, firepower: 7, armor: 9 },
+                    { name: 'Su-6', tier: 2, role: 'attack', speed: 340, firepower: 8, armor: 8 },
+                    { name: 'Pe-8', tier: 3, role: 'bomber', speed: 300, firepower: 7, armor: 9 }
                 ],
                 tanks: [
-                    { name: 'T-34', tier: 1, speed: 55, firepower: 8, armor: 7 },
-                    { name: 'T-44', tier: 2, speed: 50, firepower: 8, armor: 8 },
-                    { name: 'T-54', tier: 3, speed: 50, firepower: 9, armor: 8 }
+                    { name: 'T-34', tier: 1, role: 'light', speed: 55, firepower: 8, armor: 7 },
+                    { name: 'SU-152', tier: 2, role: 'tank_destroyer', speed: 42, firepower: 10, armor: 7 },
+                    { name: 'T-44', tier: 2, role: 'medium', speed: 50, firepower: 8, armor: 8 },
+                    { name: 'IS-2', tier: 3, role: 'heavy', speed: 37, firepower: 10, armor: 9 },
+                    { name: 'ZSU-37', tier: 2, role: 'aa', speed: 40, firepower: 8, armor: 6 }
                 ],
                 ships: [
-                    { name: 'Gnevny-class Destroyer', tier: 1, speed: 36, firepower: 7, armor: 6 },
-                    { name: 'Maxim Gorky-class Cruiser', tier: 2, speed: 32, firepower: 8, armor: 8 },
-                    { name: 'Sovetskiy Soyuz-class Battleship', tier: 3, speed: 33, firepower: 10, armor: 9 }
+                    { name: 'Gnevny-class Destroyer', tier: 1, role: 'destroyer', speed: 36, firepower: 7, armor: 6 },
+                    { name: 'Maxim Gorky-class Cruiser', tier: 2, role: 'cruiser', speed: 32, firepower: 8, armor: 8 },
+                    { name: 'Sovetskiy Soyuz-class Battleship', tier: 3, role: 'battleship', speed: 33, firepower: 10, armor: 9 },
+                    { name: 'Kiev-class Carrier', tier: 3, role: 'carrier', speed: 32, firepower: 7, armor: 8 }
                 ]
             },
             japan: {
@@ -117,17 +153,22 @@ class WarThunderEngine {
                 aircraft: [
                     { name: 'Zero', tier: 1, role: 'fighter', speed: 380, firepower: 6, armor: 5 },
                     { name: 'Ki-84 Hayate', tier: 2, role: 'fighter', speed: 420, firepower: 7, armor: 6 },
-                    { name: 'B5N "Kate"', tier: 3, role: 'bomber', speed: 240, firepower: 5, armor: 7 }
+                    { name: 'B5N "Kate"', tier: 3, role: 'bomber', speed: 240, firepower: 5, armor: 7 },
+                    { name: 'A6M2', tier: 1, role: 'fighter', speed: 390, firepower: 6, armor: 5 },
+                    { name: 'G4M Betty', tier: 3, role: 'bomber', speed: 290, firepower: 6, armor: 7 }
                 ],
                 tanks: [
-                    { name: 'Type 97', tier: 1, speed: 38, firepower: 6, armor: 5 },
-                    { name: 'Type 75', tier: 2, speed: 45, firepower: 7, armor: 6 },
-                    { name: 'Type 10', tier: 3, speed: 60, firepower: 9, armor: 8 }
+                    { name: 'Type 97', tier: 1, role: 'light', speed: 38, firepower: 6, armor: 5 },
+                    { name: 'Type 75', tier: 2, role: 'aa', speed: 45, firepower: 7, armor: 6 },
+                    { name: 'Type 10', tier: 3, role: 'heavy', speed: 60, firepower: 9, armor: 8 },
+                    { name: 'Chi-Ha', tier: 1, role: 'tank_destroyer', speed: 35, firepower: 7, armor: 5 },
+                    { name: 'Type 3 Chi-Nu', tier: 2, role: 'sniper', speed: 36, firepower: 8, armor: 6 }
                 ],
                 ships: [
-                    { name: 'Fubuki-class Destroyer', tier: 1, speed: 35, firepower: 8, armor: 6 },
-                    { name: 'Mogami-class Cruiser', tier: 2, speed: 34, firepower: 9, armor: 7 },
-                    { name: 'Yamato-class Battleship', tier: 3, speed: 27, firepower: 10, armor: 10 }
+                    { name: 'Fubuki-class Destroyer', tier: 1, role: 'destroyer', speed: 35, firepower: 8, armor: 6 },
+                    { name: 'Mogami-class Cruiser', tier: 2, role: 'cruiser', speed: 34, firepower: 9, armor: 7 },
+                    { name: 'Yamato-class Battleship', tier: 3, role: 'battleship', speed: 27, firepower: 10, armor: 10 },
+                    { name: 'Akagi-class Carrier', tier: 3, role: 'carrier', speed: 28, firepower: 8, armor: 8 }
                 ]
             },
             uk: {
@@ -137,22 +178,217 @@ class WarThunderEngine {
                 aircraft: [
                     { name: 'Spitfire MK V', tier: 1, role: 'fighter', speed: 460, firepower: 7, armor: 5 },
                     { name: 'Spitfire MK XIV', tier: 2, role: 'fighter', speed: 470, firepower: 8, armor: 6 },
-                    { name: 'Avro Lancaster', tier: 3, role: 'bomber', speed: 280, firepower: 5, armor: 8 }
+                    { name: 'Avro Lancaster', tier: 3, role: 'bomber', speed: 280, firepower: 5, armor: 8 },
+                    { name: 'Mosquito', tier: 2, role: 'attack', speed: 410, firepower: 7, armor: 6 },
+                    { name: 'Seafire', tier: 1, role: 'fighter', speed: 450, firepower: 7, armor: 5 }
                 ],
                 tanks: [
-                    { name: 'Cromwell', tier: 1, speed: 64, firepower: 7, armor: 6 },
-                    { name: 'Challenger 2', tier: 2, speed: 56, firepower: 9, armor: 8 },
-                    { name: 'Chieftain', tier: 3, speed: 48, firepower: 9, armor: 9 }
+                    { name: 'Cromwell', tier: 1, role: 'light', speed: 64, firepower: 7, armor: 6 },
+                    { name: 'Archer', tier: 2, role: 'tank_destroyer', speed: 40, firepower: 9, armor: 5 },
+                    { name: 'Challenger 2', tier: 2, role: 'heavy', speed: 56, firepower: 9, armor: 8 },
+                    { name: 'FV 4005', tier: 3, role: 'sniper', speed: 30, firepower: 10, armor: 7 },
+                    { name: 'Chieftain', tier: 3, role: 'heavy', speed: 48, firepower: 9, armor: 9 }
                 ],
                 ships: [
-                    { name: 'Daring-class Destroyer', tier: 1, speed: 34, firepower: 8, armor: 6 },
-                    { name: 'Town-class Cruiser', tier: 2, speed: 32, firepower: 8, armor: 7 },
-                    { name: 'King George V-class Battleship', tier: 3, speed: 28, firepower: 10, armor: 9 }
+                    { name: 'Daring-class Destroyer', tier: 1, role: 'destroyer', speed: 34, firepower: 8, armor: 6 },
+                    { name: 'Town-class Cruiser', tier: 2, role: 'cruiser', speed: 32, firepower: 8, armor: 7 },
+                    { name: 'King George V-class Battleship', tier: 3, role: 'battleship', speed: 28, firepower: 10, armor: 9 },
+                    { name: 'Illustrious-class Carrier', tier: 3, role: 'carrier', speed: 30, firepower: 7, armor: 8 }
                 ]
             }
         };
     }
-    
+
+    getShellsDatabase() {
+        return this.shellInventory;
+    }
+
+    getUnlockedShells() {
+        const level = this.playerStats.level;
+        return Object.entries(this.shellInventory)
+            .filter(([, shell]) => level >= shell.unlockLevel)
+            .map(([id, shell]) => ({ id, ...shell }));
+    }
+
+    getUpgradeCost(part) {
+        return 200 * this.upgrades[part];
+    }
+
+    upgradePart(part) {
+        const cost = this.getUpgradeCost(part);
+        if (this.playerStats.xp < cost) return false;
+        this.playerStats.xp -= cost;
+        this.upgrades[part] = Math.min(5, this.upgrades[part] + 1);
+        this.updateHUD();
+        return true;
+    }
+
+    switchShell(type) {
+        if (!this.shellInventory[type]) return;
+        if (this.playerStats.level < this.shellInventory[type].unlockLevel) return;
+        this.selectedShellType = type;
+        document.getElementById('objectiveInfo').textContent = `Shell: ${this.shellInventory[type].name} | Role: ${this.selectedVehicleRole}`;
+    }
+
+    deploySmokeBomb() {
+        if (this.smokeCooldown > 0 || this.playerStats.level < this.shellInventory.Smoke.unlockLevel) return;
+        this.smokeCooldown = 5;
+        for (let i = 0; i < 25; i++) {
+            this.smokeEffects.push({
+                x: this.camera.position.x + (Math.random() - 0.5) * 20,
+                y: 3 + Math.random() * 4,
+                z: this.camera.position.z + (Math.random() - 0.5) * 20,
+                life: 2 + Math.random() * 2,
+                size: 5 + Math.random() * 6
+            });
+        }
+    }
+
+    updateSmokeEffects(deltaTime) {
+        this.smokeEffects = this.smokeEffects.filter(effect => {
+            effect.life -= deltaTime;
+            if (effect.life <= 0) {
+                if (effect.mesh && effect.mesh.parent) {
+                    effect.mesh.parent.remove(effect.mesh);
+                }
+                return false;
+            }
+            if (!effect.mesh) {
+                const geometry = new THREE.SphereGeometry(effect.size, 8, 8);
+                const material = new THREE.MeshStandardMaterial({ color: 0x555555, transparent: true, opacity: 0.5, depthWrite: false });
+                effect.mesh = new THREE.Mesh(geometry, material);
+                effect.mesh.position.set(effect.x, effect.y, effect.z);
+                effect.mesh.receiveShadow = false;
+                effect.mesh.castShadow = false;
+                this.scene.add(effect.mesh);
+            }
+            effect.mesh.position.y += deltaTime * 0.3;
+            effect.mesh.material.opacity = Math.max(0, effect.life / 2) * 0.5;
+            return true;
+        });
+    }
+
+    createInfiniteTerrain() {
+        this.terrainTiles = [];
+        const range = this.terrainRadius;
+        for (let tx = -range; tx <= range; tx++) {
+            for (let tz = -range; tz <= range; tz++) {
+                this.addTerrainTile(tx, tz);
+            }
+        }
+    }
+
+    addTerrainTile(tileX, tileZ) {
+        const geometry = new THREE.PlaneGeometry(this.tileSize, this.tileSize, 64, 64);
+        geometry.rotateX(-Math.PI / 2);
+        for (let i = 0; i < geometry.attributes.position.count; i++) {
+            const x = geometry.attributes.position.getX(i) + tileX * this.tileSize;
+            const z = geometry.attributes.position.getZ(i) + tileZ * this.tileSize;
+            const height = this.generateTerrainHeight(x, z);
+            geometry.attributes.position.setY(i, height);
+        }
+        geometry.computeVertexNormals();
+
+        const material = new THREE.MeshStandardMaterial({
+            map: this.generateTerrainTexture(),
+            roughness: 0.9,
+            metalness: 0.1,
+            side: THREE.DoubleSide
+        });
+        const tile = new THREE.Mesh(geometry, material);
+        tile.position.set(tileX * this.tileSize, 0, tileZ * this.tileSize);
+        tile.receiveShadow = true;
+        tile.userData = { tileX, tileZ };
+        this.scene.add(tile);
+        this.terrainTiles.push(tile);
+    }
+
+    generateTerrainHeight(x, z) {
+        const noise = Math.sin(x * 0.003) * 8 + Math.cos(z * 0.003) * 10;
+        const ripple = Math.sin((x + z) * 0.01) * 3;
+        const drift = (Math.random() * 2 - 1) * 0.6;
+        return Math.max(0, noise + ripple + drift);
+    }
+
+    updateTerrainTiles() {
+        if (!this.camera) return;
+        const camTileX = Math.floor(this.camera.position.x / this.tileSize);
+        const camTileZ = Math.floor(this.camera.position.z / this.tileSize);
+        const range = this.terrainRadius;
+
+        this.terrainTiles.forEach(tile => {
+            const tx = tile.userData.tileX;
+            const tz = tile.userData.tileZ;
+            if (Math.abs(tx - camTileX) > range || Math.abs(tz - camTileZ) > range) {
+                const newTileX = camTileX + (tx < camTileX ? range : -range);
+                const newTileZ = camTileZ + (tz < camTileZ ? range : -range);
+                tile.position.set(newTileX * this.tileSize, 0, newTileZ * this.tileSize);
+                tile.userData.tileX = newTileX;
+                tile.userData.tileZ = newTileZ;
+            }
+        });
+    }
+
+    generateTerrainTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        const gradient = ctx.createLinearGradient(0, 0, 512, 512);
+        gradient.addColorStop(0, '#6a8a4f');
+        gradient.addColorStop(0.5, '#4a6a38');
+        gradient.addColorStop(1, '#3f5a2d');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 512, 512);
+
+        for (let i = 0; i < 3000; i++) {
+            const x = Math.random() * 512;
+            const y = Math.random() * 512;
+            const size = Math.random() * 4 + 1;
+            ctx.fillStyle = `rgba(${Math.floor(80 + Math.random() * 40)}, ${Math.floor(110 + Math.random() * 60)}, ${Math.floor(50 + Math.random() * 30)}, ${Math.random() * 0.35})`;
+            ctx.fillRect(x, y, size, size);
+        }
+
+        for (let i = 0; i < 20; i++) {
+            ctx.fillStyle = `rgba(60, 90, 40, ${Math.random() * 0.3 + 0.1})`;
+            ctx.beginPath();
+            ctx.ellipse(Math.random() * 512, Math.random() * 512, 20 + Math.random() * 40, 10 + Math.random() * 20, Math.random() * Math.PI, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(4, 4);
+        texture.encoding = THREE.sRGBEncoding;
+        texture.needsUpdate = true;
+        return texture;
+    }
+
+    generateWaterTexture() {
+        const canvas = document.createElement('canvas');
+        canvas.width = 256;
+        canvas.height = 256;
+        const ctx = canvas.getContext('2d');
+        const gradient = ctx.createLinearGradient(0, 0, 256, 256);
+        gradient.addColorStop(0, '#2c5f8c');
+        gradient.addColorStop(1, '#142f56');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 256, 256);
+        for (let i = 0; i < 1000; i++) {
+            ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.1})`;
+            ctx.fillRect(Math.random() * 256, Math.random() * 256, 1, 1);
+        }
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(10, 10);
+        texture.encoding = THREE.sRGBEncoding;
+        texture.needsUpdate = true;
+        return texture;
+    }
+
     // ===== UI INITIALIZATION =====
     initializeUI() {
         const container = document.getElementById('gameContainer');
@@ -214,6 +450,7 @@ class WarThunderEngine {
                     
                     <div class="hud-bottom">
                         <div id="objectiveInfo" class="objective-info"></div>
+                        <button id="openTechTreeButton" class="btn-secondary">Tech Tree</button>
                         <button id="quitGameButton" class="btn-quit">Quit Game</button>
                     </div>
                 </div>
@@ -248,6 +485,7 @@ class WarThunderEngine {
         document.getElementById('backToGameModeButton').addEventListener('click', () => this.goToGameModeSelection());
         document.getElementById('backToMenuButton').addEventListener('click', () => this.returnToMenu());
         document.getElementById('quitGameButton').addEventListener('click', () => this.quitCurrentGame());
+        document.getElementById('openTechTreeButton').addEventListener('click', () => this.showTechTree());
     }
     
     initializeCountrySelection() {
@@ -341,15 +579,28 @@ class WarThunderEngine {
         if (this.selectedGameMode === 'air_arcade') {
             roles = [
                 { id: 'fighter', name: 'Fighter Pilot', icon: '✈️', desc: 'Air-to-air combat' },
-                { id: 'bomber', name: 'Bomber Pilot', icon: '💣', desc: 'Bomb ground targets' }
+                { id: 'bomber', name: 'Bomber Pilot', icon: '💣', desc: 'Bomb ground targets' },
+                { id: 'attack', name: 'Attack Pilot', icon: '🔥', desc: 'Strike vehicles and ground targets' },
+                { id: 'recon', name: 'Recon Pilot', icon: '🛰️', desc: 'Spot enemies and support allies' }
             ];
         } else if (this.selectedGameMode === 'ground_arcade') {
             roles = [
-                { id: 'tank', name: 'Tank Commander', icon: '🚚', desc: 'Heavy armor combat' }
+                { id: 'tank', name: 'Tank Commander', icon: '🚚', desc: 'All tank classes and upgrades' },
+                { id: 'heavy', name: 'Heavy Tank', icon: '🔰', desc: 'Armored front-line firepower' },
+                { id: 'light', name: 'Light Tank', icon: '⚡', desc: 'Fast scouting and flanking' },
+                { id: 'tank_destroyer', name: 'Tank Destroyer', icon: '🎯', desc: 'Long-range anti-armor strikes' },
+                { id: 'aa', name: 'AA Tank', icon: '🎇', desc: 'Protect against aircraft threats' },
+                { id: 'aaa', name: 'AAA Tank', icon: '🛡️', desc: 'Heavy anti-aircraft defense' },
+                { id: 'sniper', name: 'Sniper Tank', icon: '🎯', desc: 'Precision long-range shots' },
+                { id: 'stealth', name: 'Stealth Tank', icon: '🕶️', desc: 'Avoid detection and raid positions' }
             ];
         } else if (this.selectedGameMode === 'naval') {
             roles = [
-                { id: 'ship', name: 'Naval Captain', icon: '⚓', desc: 'Command warships' }
+                { id: 'ship', name: 'Naval Captain', icon: '⚓', desc: 'Command every ship class' },
+                { id: 'destroyer', name: 'Destroyer', icon: '🛳️', desc: 'Fast escorts and torpedo strikes' },
+                { id: 'cruiser', name: 'Cruiser', icon: '🛥️', desc: 'Balanced firepower and speed' },
+                { id: 'battleship', name: 'Battleship', icon: '⚓', desc: 'Heavy guns and armor' },
+                { id: 'carrier', name: 'Carrier', icon: '🛩️', desc: 'Launch aircraft and support fleets' }
             ];
         }
         
@@ -416,7 +667,10 @@ class WarThunderEngine {
         this.scene.add(directionalLight);
         
         // Create environment
+        this.loadPlayerStats();
         this.createGameEnvironment();
+        this.updateHUD();
+        this.switchShell(this.selectedShellType);
         
         // Setup input
         this.setupGameInput();
@@ -442,48 +696,51 @@ class WarThunderEngine {
     }
     
     createLandEnvironment() {
-        // Ground plane
-        const groundGeometry = new THREE.PlaneGeometry(2000, 2000);
-        const groundMaterial = new THREE.MeshStandardMaterial({
-            color: 0x4a7c59,
-            roughness: 0.8
-        });
-        const ground = new THREE.Mesh(groundGeometry, groundMaterial);
-        ground.rotation.x = -Math.PI / 2;
-        ground.receiveShadow = true;
-        this.scene.add(ground);
-        
-        // Add some terrain features
-        for (let i = 0; i < 10; i++) {
-            const hillGeometry = new THREE.ConeGeometry(30 + Math.random() * 20, 15, 16);
-            const hillMaterial = new THREE.MeshStandardMaterial({ color: 0x2d5a2d });
+        this.scene.fog.near = 50;
+        this.scene.fog.far = 1200;
+        this.createInfiniteTerrain();
+
+        // Add scattered hills and rock outcrops for realism
+        for (let i = 0; i < 16; i++) {
+            const hillGeometry = new THREE.ConeGeometry(20 + Math.random() * 25, 12 + Math.random() * 12, 16);
+            const hillMaterial = new THREE.MeshStandardMaterial({ color: 0x2e5a2f, roughness: 0.9 });
             const hill = new THREE.Mesh(hillGeometry, hillMaterial);
-            hill.position.x = (Math.random() - 0.5) * 800;
-            hill.position.z = (Math.random() - 0.5) * 800;
+            hill.position.x = (Math.random() - 0.5) * 1400;
+            hill.position.z = (Math.random() - 0.5) * 1400;
             hill.position.y = 0;
             hill.castShadow = true;
             hill.receiveShadow = true;
             this.scene.add(hill);
         }
-        
-        // Create control points if ground arcade
+
         if (this.selectedGameMode === 'ground_arcade') {
             this.createControlPoints();
         }
     }
     
     createWaterEnvironment() {
-        // Water plane
         const waterGeometry = new THREE.PlaneGeometry(2000, 2000);
         const waterMaterial = new THREE.MeshStandardMaterial({
-            color: 0x1a5490,
-            roughness: 0.2,
-            metalness: 0.3
+            color: 0x17638f,
+            roughness: 0.25,
+            metalness: 0.4,
+            map: this.generateWaterTexture()
         });
         const water = new THREE.Mesh(waterGeometry, waterMaterial);
         water.rotation.x = -Math.PI / 2;
         water.receiveShadow = true;
         this.scene.add(water);
+
+        // Add islands for naval gameplay and visual variety
+        for (let i = 0; i < 5; i++) {
+            const islandGeo = new THREE.CylinderGeometry(30 + Math.random() * 40, 70 + Math.random() * 80, 10, 16);
+            const islandMaterial = new THREE.MeshStandardMaterial({ color: 0x4a6f39, roughness: 0.9 });
+            const island = new THREE.Mesh(islandGeo, islandMaterial);
+            island.rotation.x = -Math.PI / 2;
+            island.position.set((Math.random() - 0.5) * 1600, 0.1, (Math.random() - 0.5) * 1600);
+            island.castShadow = true;
+            this.scene.add(island);
+        }
     }
     
     createControlPoints() {
@@ -518,6 +775,10 @@ class WarThunderEngine {
         
         document.addEventListener('keydown', (e) => {
             this.keys[e.key.toLowerCase()] = true;
+            if (e.key === '1') this.switchShell('AP');
+            if (e.key === '2') this.switchShell('HE');
+            if (e.key === '3') this.switchShell('Smoke');
+            if (e.key.toLowerCase() === 'b') this.deploySmokeBomb();
         });
         
         document.addEventListener('keyup', (e) => {
@@ -539,9 +800,19 @@ class WarThunderEngine {
     }
     
     onGameClick() {
-        // Fire weapon
-        this.playerStats.ammo = Math.max(0, this.playerStats.ammo - 10);
-        this.playerStats.score += 5;
+        const shell = this.shellInventory[this.selectedShellType];
+        if (!shell || this.playerStats.level < shell.unlockLevel) return;
+
+        if (this.selectedShellType === 'Smoke') {
+            this.deploySmokeBomb();
+            return;
+        }
+
+        const ammoCost = this.selectedShellType === 'HE' ? 12 : 10;
+        this.playerStats.ammo = Math.max(0, this.playerStats.ammo - ammoCost);
+        this.playerStats.score += shell.damage * 0.3;
+        this.playerStats.xp += shell.damage * 0.2;
+        this.updateHUD();
     }
     
     animate() {
@@ -553,6 +824,8 @@ class WarThunderEngine {
         const deltaTime = 1/60;
         this.gameTimer += deltaTime;
         this.updateGameLogic(deltaTime);
+        this.updateTerrainTiles();
+        this.updateSmokeEffects(deltaTime);
         this.updateHUD();
         
         // Render
@@ -582,6 +855,9 @@ class WarThunderEngine {
         
         // Natural resource decay
         this.playerStats.fuel = Math.max(0, this.playerStats.fuel - (0.3 * deltaTime));
+        if (this.smokeCooldown > 0) {
+            this.smokeCooldown = Math.max(0, this.smokeCooldown - deltaTime);
+        }
         
         // Check loss conditions
         if (this.playerStats.fuel === 0) {
@@ -591,81 +867,62 @@ class WarThunderEngine {
             this.endGame('Your vehicle was destroyed!');
         }
         
-        // Random enemy damage
+        const armorMitigation = 1 - Math.min(0.5, this.upgrades.armor * 0.05);
+        const smokeMitigation = this.smokeCooldown > 0 ? 0.5 : 1;
         if (Math.random() > 0.98) {
-            this.playerStats.health = Math.max(0, this.playerStats.health - Math.random() * 15);
+            this.playerStats.health = Math.max(0, this.playerStats.health - Math.random() * 15 * armorMitigation * smokeMitigation);
         }
     }
     
     updateAirArcadeLogic(deltaTime) {
-        // Air arcade: Bomb targets and destroy enemies
         const mode = this.selectedVehicleRole;
-        
-        // Simulate target destruction
-        if (Math.random() > 0.95) {
-            const targetsDestroyed = Math.floor(this.gameTimer / 10);
+        if (Math.random() > 0.96) {
             this.playerStats.score += 50;
-            this.playerStats.xp += 25;
+            this.playerStats.xp += mode === 'attack' ? 35 : 25;
         }
-        
-        // Simulate enemy encounters
         if (Math.random() > 0.94) {
             this.playerStats.score += 100;
             this.playerStats.xp += 50;
         }
-        
-        // Fuel management
-        const fuel_drain = mode === 'fighter' ? 0.15 : 0.20; // Bombers use more fuel
-        this.playerStats.fuel = Math.max(0, this.playerStats.fuel - (fuel_drain * deltaTime));
-        
-        // Update objective
-        const targetInfo = `${this.selectedVehicleRole === 'fighter' ? 'Fighter' : 'Bomber'} - Score: ${Math.round(this.playerStats.score)}`;
+        const fuelDrain = mode === 'fighter' ? 0.12 : mode === 'bomber' ? 0.22 : mode === 'attack' ? 0.18 : 0.16;
+        this.playerStats.fuel = Math.max(0, this.playerStats.fuel - (fuelDrain * deltaTime));
+        const roleNames = { fighter: 'Fighter', bomber: 'Bomber', attack: 'Attack', recon: 'Recon' };
+        const targetInfo = `${roleNames[mode] || 'Air'} | Shell: ${this.selectedShellType} | Score: ${Math.round(this.playerStats.score)}`;
         document.getElementById('objectiveInfo').textContent = targetInfo;
     }
     
     updateGroundArcadeLogic(deltaTime) {
-        // Ground arcade: Capture and hold control points for 5 minutes
         this.controlPoints.forEach((point, index) => {
-            // Simulate capture progress
             if (Math.random() > 0.92) {
                 point.captureProgress += deltaTime;
-                
-                // Point captured (5 minutes = 300 seconds simulated as 30 game seconds)
                 if (point.captureProgress >= 30) {
-                    this.playerStats.score += 2000;
-                    this.playerStats.xp += 200;
+                    const scoreBonus = this.selectedVehicleRole === 'tank_destroyer' || this.selectedVehicleRole === 'sniper' ? 2600 : 2000;
+                    this.playerStats.score += scoreBonus;
+                    this.playerStats.xp += 220;
                     point.captureProgress = 0;
                     point.owned = 'team_a';
                 }
             }
         });
-        
-        // Simulate incoming fire
         if (Math.random() > 0.96) {
-            this.playerStats.health = Math.max(0, this.playerStats.health - Math.random() * 20);
+            const stealthFactor = this.selectedVehicleRole === 'stealth' ? 0.45 : 1;
+            this.playerStats.health = Math.max(0, this.playerStats.health - Math.random() * 20 * stealthFactor);
         }
-        
-        const capProgress = this.controlPoints.reduce((sum, p) => sum + p.captureProgress, 0);
-        const objectiveText = `Capture & Hold - Captured: ${this.controlPoints.filter(p => p.owned === 'team_a').length}/3 | Score: ${Math.round(this.playerStats.score)}`;
+        const objectiveText = `Ground ${this.selectedVehicleRole ? this.selectedVehicleRole.replace('_', ' ').toUpperCase() : 'Arcade'} | Score: ${Math.round(this.playerStats.score)}`;
         document.getElementById('objectiveInfo').textContent = objectiveText;
     }
     
     updateNavalLogic(deltaTime) {
-        // Naval: Ship combat with objective points
-        // Similar to ground but with water mechanics
-        
-        // Simulate naval engagements
         if (Math.random() > 0.93) {
-            this.playerStats.score += 150;
-            this.playerStats.xp += 75;
+            const bonus = this.selectedVehicleRole === 'battleship' ? 200 : this.selectedVehicleRole === 'carrier' ? 170 : 150;
+            this.playerStats.score += bonus;
+            this.playerStats.xp += this.selectedVehicleRole === 'carrier' ? 90 : 75;
         }
-        
-        // Simulate incoming fire
         if (Math.random() > 0.95) {
-            this.playerStats.health = Math.max(0, this.playerStats.health - Math.random() * 25);
+            const shipArmor = this.selectedVehicleRole === 'battleship' ? 0.7 : 1;
+            this.playerStats.health = Math.max(0, this.playerStats.health - Math.random() * 25 * shipArmor);
         }
-        
-        const navalText = `Naval Battle - Engaging enemies | Score: ${Math.round(this.playerStats.score)}`;
+        const navalText = `${this.selectedVehicleRole ? this.selectedVehicleRole.toUpperCase() : 'Naval'} Battle | Score: ${Math.round(this.playerStats.score)}`;
         document.getElementById('objectiveInfo').textContent = navalText;
     }
     
@@ -701,6 +958,8 @@ class WarThunderEngine {
             totalXP: this.playerStats.xp,
             level: this.playerStats.level,
             totalScore: this.playerStats.score,
+            upgrades: this.upgrades,
+            selectedShellType: this.selectedShellType,
             lastGameDate: new Date().toISOString()
         };
         localStorage.setItem(`warThunderStats_${this.selectedCountry}`, JSON.stringify(stats));
@@ -712,6 +971,8 @@ class WarThunderEngine {
             const stats = JSON.parse(saved);
             this.playerStats.xp = stats.totalXP || 0;
             this.playerStats.level = stats.level || 1;
+            this.upgrades = stats.upgrades || this.upgrades;
+            this.selectedShellType = stats.selectedShellType || this.selectedShellType;
         }
     }
     
@@ -719,19 +980,25 @@ class WarThunderEngine {
         const countries = this.getCountriesDatabase();
         const country = countries[this.selectedCountry];
         const level = this.playerStats.level;
-        
+        const role = this.selectedVehicleRole;
+        const threshold = Math.ceil(level / 3);
+
+        const matchesRole = (vehicleRole, type) => {
+            if (!role || role === 'tank' || role === 'ship') return true;
+            if (type === 'aircraft') return vehicleRole === role;
+            if (type === 'tanks') return vehicleRole === role;
+            if (type === 'ships') return vehicleRole === role;
+            return false;
+        };
+
         let availableVehicles = [];
-        
         if (this.selectedGameMode === 'air_arcade') {
-            availableVehicles = this.selectedVehicleRole === 'fighter' 
-                ? country.aircraft.filter(v => v.tier <= Math.ceil(level / 3))
-                : country.aircraft.filter(v => v.tier <= Math.ceil(level / 3) && v.role === 'bomber');
+            availableVehicles = country.aircraft.filter(v => v.tier <= threshold && matchesRole(v.role, 'aircraft'));
         } else if (this.selectedGameMode === 'ground_arcade') {
-            availableVehicles = country.tanks.filter(v => v.tier <= Math.ceil(level / 3));
+            availableVehicles = country.tanks.filter(v => v.tier <= threshold && matchesRole(v.role, 'tanks'));
         } else if (this.selectedGameMode === 'naval') {
-            availableVehicles = country.ships.filter(v => v.tier <= Math.ceil(level / 3));
+            availableVehicles = country.ships.filter(v => v.tier <= threshold && matchesRole(v.role, 'ships'));
         }
-        
         return availableVehicles;
     }
     
@@ -800,6 +1067,7 @@ class WarThunderEngine {
                     <span>Speed: ${vehicle.speed}</span>
                     <span>Firepower: ${vehicle.firepower}/10</span>
                     <span>Armor: ${vehicle.armor}/10</span>
+                    <span>Role: ${vehicle.role || 'Unknown'}</span>
                 </div>
                 ${unlocked ? '<span style="color: #00ff00; font-size: 0.85rem;">✓ UNLOCKED</span>' : '<span style="color: #ff6666; font-size: 0.85rem;">Tier ' + vehicle.tier + ' - Unlock at Level ' + (vehicle.tier * 3) + '</span>'}
             `;
@@ -821,12 +1089,62 @@ class WarThunderEngine {
                     <span>Speed: ${vehicle.speed}</span>
                     <span>Firepower: ${vehicle.firepower}/10</span>
                     <span>Armor: ${vehicle.armor}/10</span>
+                    <span>Role: ${vehicle.role || 'Unknown'}</span>
                 </div>
                 ${unlocked ? '<span style="color: #00ff00; font-size: 0.85rem;">✓ UNLOCKED</span>' : '<span style="color: #ff6666; font-size: 0.85rem;">Tier ' + vehicle.tier + ' - Unlock at Level ' + (vehicle.tier * 3) + '</span>'}
             `;
             shipsDiv.appendChild(vehicleEl);
         });
         content.appendChild(shipsDiv);
+
+        const shellDiv = document.createElement('div');
+        shellDiv.className = 'tech-tree-branch';
+        shellDiv.innerHTML = `<h3>💣 Shells & Smoke</h3>`;
+        this.getUnlockedShells().forEach(shell => {
+            const shellEl = document.createElement('div');
+            shellEl.className = 'tech-vehicle unlocked';
+            shellEl.innerHTML = `
+                <div class="tech-vehicle-name">${shell.name}</div>
+                <div class="tech-vehicle-stats">
+                    <span>Damage: ${shell.damage}</span>
+                    <span>Unlock Level: ${shell.unlockLevel}</span>
+                </div>
+                <div style="font-size:0.85rem; color:#ddd; margin-top:4px;">${shell.description}</div>
+            `;
+            shellDiv.appendChild(shellEl);
+        });
+        content.appendChild(shellDiv);
+
+        const upgradesDiv = document.createElement('div');
+        upgradesDiv.className = 'tech-tree-branch';
+        upgradesDiv.innerHTML = `<h3>🔧 Upgrades</h3>`;
+        ['engine', 'armor', 'turret'].forEach(part => {
+            const level = this.upgrades[part];
+            const cost = this.getUpgradeCost(part);
+            const upgradeEl = document.createElement('div');
+            upgradeEl.className = 'tech-vehicle unlocked';
+            upgradeEl.innerHTML = `
+                <div class="tech-vehicle-name">${part.charAt(0).toUpperCase() + part.slice(1)} Upgrade</div>
+                <div class="tech-vehicle-stats">
+                    <span>Level: ${level}</span>
+                    <span>Next Cost: ${cost} XP</span>
+                </div>
+                <button class="upgrade-button" data-part="${part}" style="margin-top: 8px;">Upgrade</button>
+            `;
+            upgradesDiv.appendChild(upgradeEl);
+        });
+        content.appendChild(upgradesDiv);
+
+        content.querySelectorAll('.upgrade-button').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const part = e.target.dataset.part;
+                if (this.upgradePart(part)) {
+                    this.renderTechTree();
+                } else {
+                    alert('Not enough XP to upgrade ' + part + '.');
+                }
+            });
+        });
     }
     
     quitCurrentGame() {
